@@ -407,8 +407,6 @@ AC_SUBST(HAVE_PERSONALITY,)
 AC_CHECK_FUNC(personality, HAVE_PERSONALITY=1, HAVE_PERSONALITY=0)
 AC_DEFINE_UNQUOTED(HAVE_PERSONALITY,$HAVE_PERSONALITY,[whether personality() is found])
 
-dnl AC_SUBST(PTHREADS,yes) AC_ARG_ENABLE(pthreads, AS_HELP_STRING(--disable-pthreads,[disable pthreads (for gc)]), PTHREADS=$enableval)
-
 AC_SUBST(STRIP,no)     AC_ARG_ENABLE(strip, AS_HELP_STRING(--enable-strip,strip the symbol table from the Macaulay 2 binary), STRIP=$enableval)
 AC_SUBST(STATIC,no)    AC_ARG_ENABLE(static, AS_HELP_STRING(--enable-static,enable static linking), STATIC=$enableval)
 AC_SUBST(MEMDEBUG,no)  AC_ARG_ENABLE(memdebug, AS_HELP_STRING(--enable-memdebug,enable memory allocation debugging), MEMDEBUG=$enableval)
@@ -488,10 +486,7 @@ then AC_FC_DUMMY_MAIN()
      AC_FC_LIBRARY_LDFLAGS()
 fi
 
-dnl if test "$PTHREADS" = yes
-dnl then
-    AC_SEARCH_LIBS(pthread_mutex_trylock,pthread)
-dnl fi
+AC_SEARCH_LIBS(pthread_mutex_trylock,pthread)
 
 AC_SUBST(PROFILING,no)
 AC_ARG_ENABLE(profile, AS_HELP_STRING(--enable-profile,enable profiling (and disable stripping)), PROFILING=$enableval)
@@ -1147,14 +1142,10 @@ then AC_LANG(C)
 		BUILD_gc=yes)],
 	BUILD_gc=yes)
 fi
-AC_SUBST(GC_LIBS,-lgc)
+AC_SUBST(GC_LIBS,-lgc)		dnl so we can link c/scc1 with the libraries libgc needs
 if test $BUILD_gc = yes
-then 
-     dnl if test $PTHREADS = yes
-     dnl then # libpthread isn't really built by us, but gc will need to link against it
-	  BUILTLIBS="-lpthread $BUILTLIBS"
-	  GC_LIBS="$GC_LIBS -lpthread"
-     dnl fi
+then dnl gc will need to link against libpthread
+     GC_LIBS="$GC_LIBS -lpthread"
      BUILTLIBS="-lgc $BUILTLIBS"
 fi
 
@@ -1387,23 +1378,14 @@ test "$USE_FCLIBS" = no && FCLIBS=
 test "$FORTRANUSED" = no && FCLIBS=
 AC_SUBST(FCLIBS_DYNAMIC,)
 AC_SUBST(FCLIBS_STATIC,)
+AC_SUBST(FCLIBS_EITHER,)
 AC_SUBST(FCLIBS_FLAGS,)
-    # Under Ubuntu 8.10 -lgfortranbegin & -lgfortran come from libgfortran3, but that package isn't in Ubuntu 8.4
-    # so we try to link it statically, because there are many Ubuntu users of 8.4.
-    # Linking statically with -llapack -lblas results in conflicts between symbols in the two packages under Ubuntu:
-    #     /usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../../../lib/libblas.a(xerbla.o): In function `xerbla_':
-    #     (.text+0x0): multiple definition of `xerbla_'
-    #     /usr/lib/gcc/x86_64-linux-gnu/4.3.2/../../../../lib/liblapack.a(xerbla.o):(.text+0x0): first defined here
-    #     collect2: ld returned 1 exit status
-    # Note: static version is here:
-    #  /usr/lib/gcc/x86_64-linux-gnu/4.3.2/libgfortran.a
-    #  /usr/lib/gcc/x86_64-linux-gnu/4.3.2/libgfortranbegin.a
-    # Note: see discussion in emacs info about -static-libgcc and -shared-libgcc; -lgcc_s should be dynamically linked
 for i in $FCLIBS
 do case $i in
 	-L*) FCLIBS_FLAGS="$FCLIBS_FLAGS $i" ;;
-	-lgfortranbegin | -lgfortran) FCLIBS_STATIC="$FCLIBS_STATIC $i" ;;
-	*) FCLIBS_DYNAMIC="$FCLIBS_DYNAMIC $i" ;;
+	# ) FCLIBS_STATIC="$FCLIBS_STATIC $i" ;;
+	-ldl) FCLIBS_DYNAMIC="$FCLIBS_DYNAMIC $i" ;;
+	*) FCLIBS_EITHER="$FCLIBS_EITHER $i" ;;
    esac
 done
 
@@ -1552,10 +1534,17 @@ AC_SUBST(LIBS_DYNAMIC,)
 for i in $LIBS
 do case $i in 
 	# we must link dynamically with some libraries:
+	#   pthread: linking statically results in undefined symbols _dl_stack_flags, __syscall_error, ...
 	#   ncurses: has a database which we aren't providing and whose location we don't know
+	#		maybe no longer true, so try doing it dynamically
 	#    socket: dynamic loading of libraries is used to determine the current way to look up an IP number
-	#  libgcc_s: comes only in dynamic form
-	-lncurses | -lsocket  | -lgcc_s* ) LIBS_DYNAMIC="$LIBS_DYNAMIC $i" ;;
+	#  libgcc_s: comes only in dynamic form; see discussion in emacs info about -static-libgcc and -shared-libgcc
+	#        dl: only the dynamic version defines __dlopen, __dlclose, and __dlsym
+	#	     and linking statically gives this warning:
+	#			Using 'dlopen' in statically linked
+	#			applications requires at runtime the shared
+	#			libraries from the glibc version used for linking
+	-lpthread | -ldl | -lsocket  | -lgcc_s* ) LIBS_DYNAMIC="$LIBS_DYNAMIC $i" ;;
 	# but on some systems, libpari is provided only dynamically (fedora), so we link dynamically
 	# and later we'll figure out a run-time test for whether pari is based on gmp
 	# # we must link statically with some libraries:

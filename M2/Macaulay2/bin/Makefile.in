@@ -138,20 +138,37 @@ endif
 
 # the order of this list should agree with that in ../../configure.ac
 
-M2_LIBRARIES +=  @BUILTLIBS@
+ifeq (@STATIC@,yes)
+M2_LDFLAGS += -static-libgcc -static-libstdc++
+endif
+
+ifeq (@STATIC@,yes)
+# the static versions of libblas and liblapack contain different files called xerbla.o that define xerbla_, 
+#	but only libblas defines xerbli_, which is also needed, so we need the libblas version to load first
+#	to do that, we add " -u xerbla_ -lblas " early on
+M2_LIBRARIES += $(TOSTATIC) -u xerbla_ -lblas $(UNSTATIC)
+endif
+
+# currently our libraries are built only statically, but that may change:
+M2_LIBRARIES +=  $(MAYBESTATIC) @BUILTLIBS@
+
 M2_LIBRARIES +=  $(TOSTATIC) @LIBS_STATIC@
 M2_LIBRARIES +=  $(MAYBESTATIC) @LIBS_EITHER@
+
+ifeq (@STATIC@,yes)
+# the static version of libreadline, included above, needs to get "tputs", "tgoto", etc., from libtermcap or libtinfo,
+# and the configure script is not good at detecting that
+M2_LIBRARIES += -ltermcap
+endif
+
 # I'm not sure whether compiling statically with libstdc++ is a good idea
 M2_LIBRARIES += -lstdc++
 
 M2_LDFLAGS += @FCLIBS_FLAGS@
-M2_LIBRARIES += @LIBS_DYNAMIC@ $(TOSTATIC) @FCLIBS_STATIC@ $(UNSTATIC) @FCLIBS_DYNAMIC@
+M2_LIBRARIES += $(UNSTATIC) @LIBS_DYNAMIC@ $(TOSTATIC) @FCLIBS_STATIC@ $(UNSTATIC) @FCLIBS_DYNAMIC@ $(MAYBESTATIC) @FCLIBS_EITHER@ $(UNSTATIC)
 
 ifeq (@MYSQL@,yes)
 M2_LIBRARIES += -L/usr/lib/mysql -lmysqlclient
-endif
-ifeq (@XML@,yes)
-M2_LIBRARIES += -lxml2
 endif
 M2_LIBRARIES += -lm -lc
 ifeq (@CONSTRUCTOR_ORDER_LIB@,LR)
