@@ -124,6 +124,8 @@ M2_CXXFLAGS += -Wconversion $(M2_BOTH)
 # returns a 64-bit pointer is not declared as such, then only 32 bits of the return value will be used.
 endif
 endif
+
+STRIP = @STRIP@
 STRIPCMD = @STRIPCMD@
 ifeq "$(STRIP)" "yes"
 ifneq "@OS@" "Darwin"
