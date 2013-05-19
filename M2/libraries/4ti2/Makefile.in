@@ -6,6 +6,9 @@ URL = http://www.math.uiuc.edu/Macaulay2/Downloads/OtherSourceCode/1.4
 STRIPFILES = src/groebner/4ti2gmp@EXEEXT@ src/groebner/4ti2int32@EXEEXT@ src/groebner/4ti2int64@EXEEXT@
 LICENSEFILES = README
 include ../Makefile.library
+ifeq ($(STRIP),yes)
+INSTALLTARGET = install-strip
+endif
 Makefile: @srcdir@/Makefile.in ; cd ../.. && ./config.status libraries/4ti2/Makefile
 # Local Variables:
 # compile-command: "make -C $M2BUILDDIR/libraries/4ti2 "
