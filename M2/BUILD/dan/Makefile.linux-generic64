@@ -7,6 +7,7 @@ CONFIGOPTIONS += --enable-debug
 else
 DIRECTORY ?= linux64
 endif
+CONFIGOPTIONS += --enable-strip
 CONFIGOPTIONS += --enable-tarfile
 CONFIGOPTIONS += --enable-static
 CONFIGOPTIONS += --with-issue=Generic
@@ -21,5 +22,5 @@ arch-chk:; [ `uname -m` = x86_64 ]
     # but then it doesn't work
 
 # Local Variables:
-# compile-command: "time make -f Makefile.linux-generic64 "
+# compile-command: "time make -f Makefile.linux-generic64 rebuild-world "
 # End:
