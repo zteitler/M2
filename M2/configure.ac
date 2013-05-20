@@ -425,6 +425,21 @@ dnl if [[ "$USE_THREADS" = yes ]]
 dnl then AC_DEFINE(USE_THREADS,1,[whether to use thread local storage])
 dnl fi
 
+AC_SUBST(GCC_ACCEPTS_STATIC_LIBSTDC)
+AC_MSG_CHECKING(whether gcc accepts the option -static-libstdc++)
+AC_LANG(C)
+CPPFLAGS_SAVE="$CPPFLAGS"
+CPPFLAGS="$CPPFLAGS -static-libstdc++"
+AC_COMPILE_IFELSE(
+	[AC_LANG_SOURCE()],
+	[  if grep "unrecognized option" conftest.err >/dev/null
+	   then GCC_ACCEPTS_STATIC_LIBSTDC=no
+	   else GCC_ACCEPTS_STATIC_LIBSTDC=yes
+	   fi],     	,
+	[ GCC_ACCEPTS_STATIC_LIBSTDC=no])
+AC_MSG_RESULT($GCC_ACCEPTS_STATIC_LIBSTDC)
+CPPFLAGS=$CPPFLAGS_SAVE
+
 AC_SUBST(FROBBY,yes)
 AC_ARG_ENABLE(frobby, AS_HELP_STRING(--disable-frobby,[do not download, compile, and link with frobby library]), FROBBY=$enableval)
 if test "$FROBBY" = yes
@@ -1146,6 +1161,7 @@ AC_SUBST(GC_LIBS,-lgc)		dnl so we can link c/scc1 with the libraries libgc needs
 if test $BUILD_gc = yes
 then dnl gc will need to link against libpthread
      GC_LIBS="$GC_LIBS -lpthread"
+     LIBS="$LIBS -lpthread"
      BUILTLIBS="-lgc $BUILTLIBS"
 fi
 

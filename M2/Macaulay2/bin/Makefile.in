@@ -139,7 +139,10 @@ endif
 # the order of this list should agree with that in ../../configure.ac
 
 ifeq (@STATIC@,yes)
-M2_LDFLAGS += -static-libgcc -static-libstdc++
+M2_LDFLAGS += -static-libgcc
+ifeq (@GCC_ACCEPTS_STATIC_LIBSTDC@,yes)
+M2_LDFLAGS += -static-libstdc++
+endif
 endif
 
 ifeq (@STATIC@,yes)
