@@ -502,6 +502,7 @@ then AC_FC_DUMMY_MAIN()
 fi
 
 AC_SEARCH_LIBS(pthread_mutex_trylock,pthread)
+AC_SEARCH_LIBS(pthread_atfork,pthread) dnl under Ubuntu 10.04 pthread_mutex_trylock does not require -lpthread, but this one does
 
 AC_SUBST(PROFILING,no)
 AC_ARG_ENABLE(profile, AS_HELP_STRING(--enable-profile,enable profiling (and disable stripping)), PROFILING=$enableval)
@@ -1161,7 +1162,6 @@ AC_SUBST(GC_LIBS,-lgc)		dnl so we can link c/scc1 with the libraries libgc needs
 if test $BUILD_gc = yes
 then dnl gc will need to link against libpthread
      GC_LIBS="$GC_LIBS -lpthread"
-     LIBS="$LIBS -lpthread"
      BUILTLIBS="-lgc $BUILTLIBS"
 fi
 
@@ -1581,6 +1581,7 @@ AC_MSG_NOTICE([     LIBS_STATIC    = $LIBS_STATIC])
 AC_MSG_NOTICE([     LIBS_EITHER    = $LIBS_EITHER])
 AC_MSG_NOTICE([     LIBS_DYNAMIC   = $LIBS_DYNAMIC])
 AC_MSG_NOTICE([     FCLIBS_STATIC  = $FCLIBS_STATIC])
+AC_MSG_NOTICE([     FCLIBS_EITHER  = $FCLIBS_EITHER])
 AC_MSG_NOTICE([     FCLIBS_DYNAMIC = $FCLIBS_DYNAMIC])
 AC_MSG_NOTICE([using CC            = $CC])
 AC_MSG_NOTICE([using CPPFLAGS      = $CPPFLAGS])
