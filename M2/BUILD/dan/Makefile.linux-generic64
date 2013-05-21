@@ -15,12 +15,6 @@ include Makefile.include
 default: check
 arch-chk:; [ `uname -m` = x86_64 ]
 
-# tricks under ubuntu 64 10.10:
-    # remove -Wl,-Bdynamic
-    # to get Unwind_Resume: in bin dir run  "ln -s `gcc --print-file-name=libgcc_eh.a` libgcc_s.a" and add -L. to end of link command line
-    # run "ar x /usr/lib/libblas/libblas.a xerbla.o" and add xerbla.o to command line before -llapack
-    # but then it doesn't work
-
 # Local Variables:
 # compile-command: "time make -f Makefile.linux-generic64 rebuild-world "
 # End:

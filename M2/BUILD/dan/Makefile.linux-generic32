@@ -1,19 +1,9 @@
 # -*- makefile-gmake -*-
-
-DIRECTORY ?= linux32.generic.production
-CONFIGOPTIONS += --build=i486-pc-linux-gnu
-CONFIGOPTIONS += --enable-tarfile
-CONFIGOPTIONS += --enable-static
-CONFIGOPTIONS += --with-issue=Generic
-CONFIGOPTIONS += --disable-common-staging-area
-
-# This time I didn't try to install lapack on my ubuntu32 system.
-# # for some strange reason liblapack and libblas, in static form under ubuntu32, are incompatible, 
-# # (multiple definition of `xerbla_') so we compile lapack:
-CONFIGOPTIONS += --enable-build-libraries=lapack
-
+DIRECTORY ?= linux32
+CONFIGOPTIONS += --enable-strip --enable-tarfile --enable-static --with-issue=Generic --disable-common-staging-area
 include Makefile.include
-default:check
+default: arch-chk all check
+arch-chk:; [ `uname -m` = i686 ]
 # Local Variables:
 # compile-command: "time make -f Makefile.linux-generic32 "
 # End:
