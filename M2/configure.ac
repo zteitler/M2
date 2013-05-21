@@ -632,12 +632,6 @@ AC_DEFINE_UNQUOTED(PACKAGES,"$PACKAGES",the list of packages included with the r
 AC_DEFINE_UNQUOTED(buildsystemtype,"$build",the type of system on which the package was built)
 AC_DEFINE_UNQUOTED(hostsystemtype,"$host",the type of system on which the package runs)
 
-case $host in
-   i586-*|i686-*)
-	newhost=`echo $host | sed s/i.86-/i486-/`
-	AC_MSG_NOTICE([warning: building for host $host might not be compatible enough, consider using option "--build=$newhost"]) ;;
-esac
-
 AC_SUBST(AUTOINST,no)
 AC_ARG_ENABLE(
     auto-instantiation, 
@@ -1400,7 +1394,8 @@ for i in $FCLIBS
 do case $i in
 	-L*) FCLIBS_FLAGS="$FCLIBS_FLAGS $i" ;;
 	# ) FCLIBS_STATIC="$FCLIBS_STATIC $i" ;;
-	-ldl) FCLIBS_DYNAMIC="$FCLIBS_DYNAMIC $i" ;;
+	-lm | -ldl) 		dnl see the list of reasons below, where we deal with LIBS_EITHER
+	   FCLIBS_DYNAMIC="$FCLIBS_DYNAMIC $i" ;;
 	*) FCLIBS_EITHER="$FCLIBS_EITHER $i" ;;
    esac
 done
@@ -1560,7 +1555,8 @@ do case $i in
 	#			Using 'dlopen' in statically linked
 	#			applications requires at runtime the shared
 	#			libraries from the glibc version used for linking
-	-lpthread | -ldl | -lsocket  | -lgcc_s* ) LIBS_DYNAMIC="$LIBS_DYNAMIC $i" ;;
+	#	  m: in Ubuntu 10.4 32bit, libm.a has a function called fedisableexcept that needs a symbol _dl_hwcap that -ldl doesn't seem to define
+	-lm | -lncurses | -lpthread | -ldl | -lsocket  | -lgcc_s* ) LIBS_DYNAMIC="$LIBS_DYNAMIC $i" ;;
 	# but on some systems, libpari is provided only dynamically (fedora), so we link dynamically
 	# and later we'll figure out a run-time test for whether pari is based on gmp
 	# # we must link statically with some libraries:
