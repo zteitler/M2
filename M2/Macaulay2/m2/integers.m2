@@ -41,8 +41,10 @@ lcm(ZZ,QQ) := (f,g) -> abs f * (abs g / gcd(f,g))
 lcm(QQ,ZZ) := (f,g) -> abs f * (abs g / gcd(f,g))
 lcm(QQ,QQ) := (f,g) -> abs f * (abs g / gcd(f,g))
 
-odd  = x -> 1 === x%2
-even = x -> 0 === x%2
+odd = method()
+odd ZZ := x -> 1 === x%2
+even = method()
+even ZZ := x -> 0 === x%2
 zero = x -> x == 0					    -- we use == so this can apply to all types of things
 
 smallprimes := {2,3,5,7,11,13,17,23,29,31,37,41,43,47}
