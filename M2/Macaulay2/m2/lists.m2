@@ -83,7 +83,8 @@ minPosition BasicList := ZZ => x -> (
 	  scan(1 .. # x-1, i -> if x#i<m then (m=x#i;pos=i));
 	  pos))
 
-number = x -> # select x
+number = method()
+number (VisibleList,Function) := (x,f) -> # select(x,f)
 
 all = method(TypicalValue => Boolean)
 all(ZZ,Function) := all(HashTable,Function) := all(BasicList,Function) := (x,p) -> not any(x, i -> not p i)
