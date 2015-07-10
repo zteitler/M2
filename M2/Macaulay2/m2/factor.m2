@@ -46,7 +46,8 @@ pseudoRemainder(RingElement,RingElement) := RingElement => (f,g) -> (
      if R =!= ring g then error "expected elements of the same ring";
      new R from rawPseudoRemainder(raw f, raw g));
 
-inversePermutation = v -> ( w := new MutableList from #v:null; scan(#v, i -> w#(v#i)=i); toList w)
+inversePermutation = method()
+inversePermutation BasicList := v -> ( w := new MutableList from #v:null; scan(#v, i -> w#(v#i)=i); toList w)
 
 -- We mimic the procedure for finding a finite field addition table used in the routine gf_get_table
 -- for building the file name in "gffilename", in the file BUILD_DIR/libraries/factory/build/factory/gfops.cc .
