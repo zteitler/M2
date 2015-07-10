@@ -145,7 +145,8 @@ allValues = () -> unique join(flatten(values \ dictionaryPath), select(getAttrib
 	  ))
 showStructure = Command(types -> show1(if types === () then justTypes allValues() else types, parent))
 showClassStructure = Command(types -> show1(if types === () then allThingsWithNames allValues() else types, class))
-ancestors = X -> while true list (local Z; if Z === Thing then break ; Z = X; X = parent X; Z)
+ancestors = method()
+ancestors Type := X -> while true list (local Z; if Z === Thing then break ; Z = X; X = parent X; Z)
 -----------------------------------------------------------------------------
 
 typicalValues#frame = MutableList
