@@ -338,6 +338,11 @@ dictionary Symbol := s -> (				    -- eventually every symbol will know what dic
 dictionary Thing := x -> if hasAttribute(x,ReverseDictionary) then dictionary getAttribute(x,ReverseDictionary)
 
 -----------------------------------------------------------------------------
+oldlines := lines
+lines = method()
+lines String := List => s -> oldlines s
+lines (String,String) := List => (nl,s) -> oldlines(nl,s)
+-----------------------------------------------------------------------------
 oldvalue := value
 value = method()
 value Symbol := value Pseudocode := oldvalue

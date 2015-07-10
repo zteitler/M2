@@ -139,8 +139,8 @@ scanPairs(HashTable,Function) := Nothing => scanPairs
 locate Symbol := locate Pseudocode := locate Function := locate Sequence := locate Nothing := Sequence => locate
 separate String := List => separate
 separate(String,String) := List => separate
-lines(String,String) := List => lines
-lines String := List => lines
+--lines(String,String) := List => lines
+--lines String := List => lines
 linkFile(String,String) := Nothing => linkFile
 fileMode(String) := ZZ => fileMode
 fileMode(ZZ,File) := fileMode
