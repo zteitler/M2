@@ -29,7 +29,8 @@ gcdCoefficients(ZZ,ZZ) := (a,b) -> (
 	  );
      n);
 
-mod = (i,n) -> i * 1_(ZZ/n)
+mod = method()
+mod (ZZ,ZZ) := (i,n) -> i * 1_(ZZ/n)
 
 
 
