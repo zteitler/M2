@@ -5,7 +5,8 @@ pad = method()
 pad(String,ZZ) := String => (s,n) -> concatenate(s,n-# s)
 pad(ZZ,String) := String => (n,s) -> concatenate(n-# s,s)
 
-columnate = (wid,items) -> (
+columnate = method()
+columnate (ZZ,BasicList) := (wid,items) -> (
      lens := apply(items,i -> #i);
      ncols := (wid+1) // (max lens + 1);
      if ncols === 0 then ncols = 1;
