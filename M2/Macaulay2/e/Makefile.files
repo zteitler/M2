@@ -9,6 +9,7 @@ INTERFACE2 = \
 	newdelete \
 
 INTERFACE = \
+	betti \
 	util \
 	GF \
 	ZZ \
@@ -126,7 +127,8 @@ INTERFACE = \
 
 COMMANDS2 = \
 	x-monideal \
-	x-factor
+	x-factor \
+	polyroots
 
 COMMANDS = \
 	ntl-internal \

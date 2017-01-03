@@ -166,8 +166,10 @@ Matrix * Matrix := Matrix => (m,n) -> (
 	  then error "maps not composable";
 	  dif := degrees P - degrees Q;
 	  deg := (
-	       if same dif
-	       then (degree m + degree n + dif#0)
+	       if #dif === 0
+	       then degree m + degree n
+	       else if same dif
+	       then degree m + degree n + dif#0
  	       else toList (degreeLength R:0)
 	       );
 	  f := m.RawMatrix * n.RawMatrix;
@@ -599,7 +601,6 @@ inducedMap(Module,Module,Matrix) := Matrix => opts -> (N',M',f) -> (
 	  if relations M % relations M' != 0 then error "inducedMap: expected new source not to have fewer relations";
 	  if relations N % relations N' != 0 then error "inducedMap: expected new target not to have fewer relations";
 	  if generators M' % gbM != 0 then error "inducedMap: expected new source not to have more generators";
-	  if generators N' % gb N != 0 then error "inducedMap: expected new target not to have more generators";
 	  if g % gbN' != 0 then error "inducedMap: expected matrix to induce a map";
 	  if not isWellDefined f' then error "inducedMap: expected matrix to induce a well-defined map";
 	  );
