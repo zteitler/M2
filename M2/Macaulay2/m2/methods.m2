@@ -14,7 +14,14 @@ silentRobustNetWithClass = silentRobustNet = (wid,ht,sec,y) -> simpleToString y
 --
 
 MethodFunction = new Type of CompiledFunctionClosure
+MethodFunctionSingle = new Type of CompiledFunctionClosure
+MethodFunctionBinary = new Type of CompiledFunctionClosure
 MethodFunctionWithOptions = new Type of FunctionClosure
+
+MethodFunction.synonym = "method function"
+MethodFunctionSingle.synonym = "method function with a single argument"
+MethodFunctionBinary.synonym = "binary method function"
+MethodFunctionWithOptions.synonym = "method function with options"
 
 dispatcherFunctions = {}
 
@@ -46,7 +53,7 @@ methodDefaults := new OptionTable from {
      }
 
 BinaryNoOptions := (outputs) -> (
-     methodFunction := newmethod1(args -> noMethod(methodFunction,args,outputs),outputs);
+     methodFunction := newmethod1(args -> noMethod(methodFunction,args,outputs),outputs,MethodFunctionBinary);
      binaryLookup := (x,y) -> (
 	  -- Common code for every associative method without options
 	  f := lookup(methodFunction,class x,class y);
@@ -148,7 +155,7 @@ method = methodDefaults >> opts -> args -> (
      methodFunction := (
 	  if opts.Options === null then (
        	       if opts.Binary then BinaryNoOptions(outputs)
-       	       else if singleArgDispatch then newmethod1 (args -> noMethodSingle(methodFunction,args,outputs), outputs)
+       	       else if singleArgDispatch then newmethod1 (args -> noMethodSingle(methodFunction,args,outputs), outputs, MethodFunctionSingle)
        	       else MultipleArgsNoOptions(opts, outputs))
 	  else (
        	       if opts.Binary then BinaryWithOptions(opts.Options,outputs)
@@ -156,19 +163,23 @@ method = methodDefaults >> opts -> args -> (
        	       else MultipleArgsWithOptions(opts, opts.Options, outputs)
 	       )
 	  );
-     if opts.TypicalValue =!= Thing then typicalValues#methodFunction = opts.TypicalValue;
+     if opts.TypicalValue =!= Thing then (
+	  if not instance(opts.TypicalValue,Type) then error("expected typical value ", toString opts.TypicalValue, " to be a type");
+	  typicalValues#methodFunction = opts.TypicalValue;
+	  );
      methodFunction)
 
 setupMethods := (args, symbols) -> (
      scan(symbols, n -> (
-	  if value n =!= n then error concatenate("symbol ",toString n," redefined");
+	  if value' n =!= n then error concatenate("symbol ",toString n," redefined");
 	  f := method args;
 	  globalAssignFunction(n,f);
 	  n <- f;
 	  )))
 
 setupMethods((), { 
-	  entries, borel, gcdCoefficients, singularLocus, replace,
+      localRing,
+	  entries, borel, gcdCoefficients, singularLocus,
 	  Hom, diff, diff', contract, contract', subsets, partitions, member,
 	  koszul, symmetricPower, trace, target, source,
 	  getChangeMatrix, poincare, cover, coverMap, super, poincareN, terms,
@@ -176,7 +187,7 @@ setupMethods((), {
 	  substitute, rank, complete, ambient, topComponents, baseName, remainder, quotientRemainder, remainder', quotientRemainder', quotient',
 	  coefficients, monomials, size, sum, product, exponents, nullhomotopy, module, raw, exp,
 	  hilbertFunction, content, leadTerm, leadCoefficient, leadMonomial, components,
-	  leadComponent, degreesRing, degrees, assign, numgens, conjugate,
+	  leadComponent, degreesRing, degrees, assign, numgens, realPart, imaginaryPart, conjugate,
 	  autoload, relations, cone, standardForm, inverse, numeric, round, degree, multidegree,
 	  presentation, dismiss, precision, 
 	  norm, clean, numColumns, numRows, fraction, part, coefficient, preimage, minimalPrimes, decompose,
@@ -184,7 +195,7 @@ setupMethods((), {
       isBasicMatrix, basicDet, basicInverse, basicKernel, basicRank, basicSolve, basicRankProfile
 	  })
 
-use = method()
+use = method(Dispatch => Thing)
 use Thing := identity
 
 dual = method(Options => true)
@@ -254,7 +265,7 @@ map = method(
 
 setupMethods(Dispatch => Thing, {transpose} )
 setupMethods(TypicalValue => Boolean,
-     {isBorel, isWellDefined, isInjective, isSurjective, isUnit, match,
+     {isBorel, isWellDefined, isInjective, isSurjective, isUnit,
 	  isSubset,isHomogeneous, isIsomorphism, isPrime, isPseudoprime, isField, isConstant
 	  })
 setupMethods(TypicalValue => ZZ,
@@ -267,6 +278,15 @@ codim = method( Options => true )
 radical = method( Options=>{ Unmixed=>false, CompleteIntersection => null, Strategy => Decompose } )
 regularity = method( TypicalValue => ZZ, Options => { Weights => null } )
 associatedPrimes = method( TypicalValue => List, Options =>{ Strategy => 1 } )
+
+-- defined in d/actors4.d
+format' := format
+format = method(Dispatch => Thing, TypicalValue => String)
+format RR :=
+format CC :=
+format String   := String => x -> format' x
+format Sequence := String => s -> format' s
+protect symbol format
 
 toString = method(Dispatch => Thing, TypicalValue => String)
 toString Thing := simpleToString			    -- if all else fails...
@@ -283,7 +303,7 @@ toExternalString Symbol := s -> (
 	  if syns#?0 then n = syns#0
 	  else error("can't convert symbol ",s," to external string because it is shadowed by ", getGlobalSymbol n, " and there is no synonym")
 	  );
-     if value s === s then n else concatenate("symbol ", n))
+     if value' s === s then n else concatenate("symbol ", n))
 toExternalString Boolean := simpleToString
 toExternalString Nothing := simpleToString
 
@@ -340,10 +360,9 @@ dictionary Symbol := s -> (				    -- eventually every symbol will know what dic
 dictionary Thing := x -> if hasAttribute(x,ReverseDictionary) then dictionary getAttribute(x,ReverseDictionary)
 
 -----------------------------------------------------------------------------
-oldvalue := value
 value = method()
-value Symbol := value Pseudocode := oldvalue
-value String := x -> oldvalue x
+value Symbol := value Pseudocode := value'		    -- compiled code
+value String := x -> value' x
 value Nothing := x -> null
 -----------------------------------------------------------------------------
 
@@ -356,6 +375,17 @@ scanKeys(Database,Function) := (x,f) -> (
 	       f s;
 	       s = nextkey x;
 	       ))
+
+-- TODO: eventually move this to lists.m2
+select' = select
+select = method(Options => true)
+select(ZZ,            Function) := List      => {} >> o -> select'
+select(ZZ, BasicList, Function) := BasicList => {} >> o -> select'
+select(ZZ, HashTable, Function) := HashTable => {} >> o -> select'
+select(    BasicList, Function) := BasicList => {} >> o -> select'
+select(    HashTable, Function) := HashTable => {} >> o -> select'
+select(    BasicList, Type)     := BasicList => {} >> o -> (L, T) -> select(L, e -> instance(e, T))
+-- two more methods installed in regex.m2
 
 oldnumerator := numerator
 erase symbol numerator
@@ -428,9 +458,6 @@ length Dictionary := s -> #s
 length String := s -> #s
 length VisibleList := s -> #s
 
-lastMatch = null
-match(String,String) := X -> null =!= (lastMatch = regex X)
-
 Nothing == Nothing := Boolean => (x,y) -> x === y			    -- actually, x and y must both be "null"!
 
 -- installation of assignment methods
@@ -470,14 +497,6 @@ scan(flexiblePostfixOperators, op -> (
 -- helper functions useable in documentation
 -----------------------------------------------------------------------------
 
-sourceFileStamp = () -> concatenate("--",toAbsolutePath currentFileName, ":", toString currentLineNumber(), ": location of test code")
-TEST = method()
-TEST String := s -> (
-     currentPackage#"test inputs"#(currentPackage#"test number") = (currentFileName,currentLineNumber(),concatenate( sourceFileStamp(), newline, s));
-     currentPackage#"test number" = currentPackage#"test number" + 1;
-     )
-TEST List := y -> TEST \ y
-
 foo := method(Options => {})
 foodict := first localDictionaries foo
 ---- we can get into an infinite loop by doing this: (it's like printing the contents of a mutable hash table
@@ -500,19 +519,35 @@ dispatcherFunctions = join (dispatcherFunctions, {
 
 addHook = method()
 removeHook = method()
-runHooks = method()
+runHooks = method(Options => true)
 
 addHook   (MutableHashTable,Thing,Function) := (obj,key,hook) -> obj#key = if obj#?key then prepend(hook,obj#key) else {hook}
 removeHook(MutableHashTable,Thing,Function) := (obj,key,hook) -> if obj#?key then obj#key = delete(obj#key,hook)
-runHooks  (MutableHashTable,Thing,Thing   ) := (obj,key,arg ) -> if obj#?key then scan(obj#key, hook -> hook arg)
+runHooks  (MutableHashTable,Thing,Thing   ) := true >> opts -> (obj,key,arg ) -> (if obj#?key then scan(obj#key, hook -> (
+          result := (if options hook =!= null then (
+               hookOpts := select(keys options hook, k -> opts#?k) / (k -> k => opts#k);
+               hook(arg, new OptionTable from hookOpts)
+               ) else hook arg 
+          );
+          if not instance(result, Nothing) then break result)))
 
 addHook   (HashTable,Thing,Function) := (obj,key,hook) -> (c := obj.cache; c#key = if c#?key then prepend(hook,c#key) else {hook})
 removeHook(HashTable,Thing,Function) := (obj,key,hook) -> (c := obj.cache; if c#?key then c#key = delete(c#key,hook))
-runHooks  (HashTable,Thing,Thing   ) := (obj,key,arg ) -> (c := obj.cache; if c#?key then scan(c#key, hook -> hook arg))
+runHooks  (HashTable,Thing,Thing   ) := true >> opts -> (obj,key,arg ) -> (c := obj.cache; if c#?key then scan(c#key, hook -> (
+          result := (if options hook =!= null then ( 
+               hookOpts := select(keys options hook, k -> opts#?k) / (k -> k => opts#k);
+               hook(arg, new OptionTable from hookOpts)
+               ) else hook arg);
+          if not instance(result, Nothing) then break result)))
 
 addHook   (Symbol,Function) := (sym,hook) -> sym <- if value sym =!= sym then prepend(hook,value sym) else {hook}
 removeHook(Symbol,Function) := (sym,hook) -> if value sym =!= sym then sym <- delete(value sym,hook)
-runHooks  (Symbol,Thing   ) := (sym,arg ) -> if value sym =!= sym then scan(value sym, hook -> hook arg)
+runHooks  (Symbol,Thing   ) := true >> opts -> (sym,arg ) -> if value sym =!= sym then scan(value sym, hook -> (
+          result := (if options hook =!= null then ( 
+               hookOpts := select(keys options hook, k -> opts#?k) / (k -> k => opts#k);
+               hook(arg, new OptionTable from hookOpts)
+               ) else hook arg);
+          if not instance(result, Nothing) then break result))
 
 -- and keys
 protect QuotientRingHook
@@ -522,7 +557,7 @@ protect QuotientRingHook
 
 CacheFunction = new Type of FunctionClosure
 CacheFunction.synonym = "a cache function"
-net CacheFunction := f -> "{*a cache function*}"
+net CacheFunction := f -> "-*a cache function*-"
 cacheValue = key -> f -> new CacheFunction from (x -> (
      	  c := try x.cache else x.cache = new CacheTable;
      	  if c#?key then (
@@ -554,9 +589,14 @@ codeHelper#(functionBody (stashValue null) null) = g -> {
 -- hypertext conversion
 
 html = method(Dispatch => Thing, TypicalValue => String)
+markdown = method(Dispatch => Thing, TypicalValue => String)
 tex = method(Dispatch => Thing, TypicalValue => String)
 texMath = method(Dispatch => Thing, TypicalValue => String)
+htmlWithTex = method(Dispatch => Thing, TypicalValue => String)
 info = method(Dispatch => Thing, TypicalValue => String)
+-- TODO: move this here: net = method(Dispatch => Thing, TypicalValue => String)
+
+show = method()
 
 -- method options
 
@@ -577,8 +617,15 @@ Function Thing = (f,x,e) -> (
      if not storefuns#?f then error("no method for storing values of function ", toString f);
      storefuns#f (x,e))
 
--- replace
-replace(String,String,String) := String => replaceStrings
+-- defined in d/actors4.d
+locate' = locate -- TODO: why does (net, FunctionBody) in nets.m2 need locate'?
+locate = method(Dispatch => Thing, TypicalValue => Sequence)
+locate Nothing    := Sequence => x -> locate' x
+locate Function   := Sequence => x -> locate' x
+locate Pseudocode := Sequence => x -> locate' x
+locate Sequence   := Sequence => x -> locate' x
+locate Symbol     := Sequence => x -> locate' x
+protect symbol locate
 
 -- baseName
 baseName Thing := R -> (

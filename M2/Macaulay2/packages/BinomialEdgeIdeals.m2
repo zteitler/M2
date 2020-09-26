@@ -5,10 +5,8 @@ newPackage("BinomialEdgeIdeals",
      {Name => "Tobias Windisch",
       Email => "windisch@ovgu.de",
       HomePage => "http://www.uni-magdeburg.de/windisch/"}},
-   Headline => "Package for computations with  binomial edge ideals",
-   PackageImports => {"Graphs","Binomials"},
-	Configuration => {},
-	Reload=>true
+   Headline => "binomial edge ideals",
+   PackageImports => {"Graphs","Binomials"}
 	)
 
 export {
@@ -158,11 +156,9 @@ beginDocumentation()
 
 document {
         Key => BinomialEdgeIdeals,
-        Headline => "a package for binomial edge ideals",
-
+        Headline => "binomial edge ideals",
         EM "BinomialEdgeIdeals", " is a package for computations with binomial edge
         ideals",
-	
 	BR{},BR{},
 	BOLD "Literature \n",
 	UL {
@@ -178,7 +174,7 @@ document {
 document {
      Key => {parityBinomialEdgeIdeal,
 	  (parityBinomialEdgeIdeal, Graph), (parityBinomialEdgeIdeal, List)},
-     Headline => "Parity binomial edge ideals",
+     Headline => "parity binomial edge ideals",
      Usage => "parityBinomialEdgeIdeal G",
      Inputs => {
           "G" => { "a Graph or a List"} },

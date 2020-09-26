@@ -15,13 +15,12 @@ newPackage(
             {Name => "Franziska Hinkelmann"}
             },
         AuxiliaryFiles=>true,
-        --PackageImports => {"MGBInterface"},
-        DebuggingMode => true
+        PackageImports => {"Elimination"}
         )
 
-<< "warning!  This package is experimental.  The interface will change, and although" << endl;
-<< "  it passes its tests, it has not been fully debugged yet!" << endl;
-<< "  In particular, in small characteristic, it *sometimes* might miss a component" << endl;
+-- << "warning!  This package is experimental.  The interface will change, and although" << endl;
+-- << "  it passes its tests, it has not been fully debugged yet!" << endl;
+-- << "  In particular, in small characteristic, it *sometimes* might miss a component" << endl;
 
 --USEMGB = true;
 USEMGB = false;
@@ -31,7 +30,8 @@ export {
     -- Main functions
     "installMinprimes",
     "minprimes",
-    "newIsPrime"
+    "newIsPrime",
+    "Verbosity"
     }
 
 protect symbol IndependentSet
@@ -51,7 +51,7 @@ protect symbol Squarefree  -- MES todo: this is never being set but is being tes
 
 protect symbol toAmbientField
 protect symbol fromAmbientField
-{*
+-*
     --
     -- Support routines
     -- The following functions are used in UnitTestsPD.  They should
@@ -87,7 +87,7 @@ protect symbol fromAmbientField
     CharacteristicSets,
     Minprimes,
     Squarefree
-*}
+*-
 
 raw  = value Core#"private dictionary"#"raw"
 rawGBContains = value Core#"private dictionary"#"rawGBContains"
@@ -324,7 +324,7 @@ isSubset (Ideal,AnnotatedIdeal) := (J,I) -> (
 --      Answer should be yes: but if we know the ideal is prime, then 
 --      we think we can avoid this.  BUT: we need to be very precise about
 --      this logic.
-{*
+-*
 ideal AnnotatedIdeal := (I) -> (
     --F := product unique join(I.Linears / (x -> x#1),I.Inverted);
     if not I#?"CachedIdeal" then I#"CachedIdeal" = (
@@ -343,7 +343,7 @@ ideal AnnotatedIdeal := (I) -> (
     );
     I#"CachedIdeal"
 )
-*}
+*-
 
 ideal AnnotatedIdeal := (I) -> (
     --F := product unique join(I.Linears / (x -> x#1),I.Inverted);
@@ -559,24 +559,24 @@ splitFunction#Factorization = (I,opts) -> (
     nonzeroFacs := toList(set facs - nonzeros);
     if #nonzeroFacs == 1 and nonzeroFacs#0 != f then
        return {adjoinElement(I,nonzeroFacs#0)};
-       {*return {annotatedIdeal(trim(ideal nonzeroFacs#0 + J),
+       -*return {annotatedIdeal(trim(ideal nonzeroFacs#0 + J),
                               I.Linears,
                               I.NonzeroDivisors,
-                              I.Inverted)};*}
+                              I.Inverted)};*-
     L := for g in nonzeroFacs list (
           -- colon or sum?
           -- Try and fix UseColon?  May not be fixable...
-          {*if opts#"UseColon" then (
+          -*if opts#"UseColon" then (
           --   -- TODO: Find the components that are missing when using colons!
           --   --       This process will miss any component for which g is in I for all g.
           --   J = I:(f // g);
-          *}
-          {*
+          *-
+          -*
           J = (ideal(g) + I.Ideal);
           J = trim ideal apply(J_*, f -> (
                 product toList (set ((factors f)/last) - nonzeros)
               ));
-          *}
+          *-
           J = adjoinElement(I,g);
           J = squarefreeGenerators(J,  -- there used to be a trim here, but we changed
                                        -- the function so that it was no longer needed.
@@ -864,7 +864,7 @@ detectMembership (RingElement, Ideal) := (f,I) -> (
    else
       null   
 )
-{*
+-*
 -- Old version - 5/28/2013
 -- this function is used in the #Factorization splitting option, followed by a trim.
 -- TODO: rethink how the trim is done when variables are added?
@@ -891,7 +891,7 @@ squarefreeGenerators AnnotatedIdeal := opts -> I -> (
    else 
       I
 )
-*}
+*-
 -- new version with trim moved to a smaller ideal than the whole input.
 squarefreeGenerators = method(Options=>{"SquarefreeFactorSize"=>1})
 squarefreeGenerators AnnotatedIdeal := opts -> I -> (
@@ -1074,7 +1074,7 @@ updatePDState (PDState,List,ZZ) := (pdState,L,pruned) -> (
      else
         ansSoFar#c = append(ansSoFar#c,(p,I));
   );
-  {*
+  -*
   -- here we update the isPrime flag if L comes in with more than one
   -- prime, then the ideal is neither prime nor primary.
   -- the reason for this is that no single step will produce multiple redundant
@@ -1084,7 +1084,7 @@ updatePDState (PDState,List,ZZ) := (pdState,L,pruned) -> (
      pdState#"isPrimeIdeal" = false;
      pdState#"isPrimaryIdeal" = false;
   );
-  *}
+  *-
 )
 
 numPrimesInPDState = method()
@@ -1457,9 +1457,8 @@ Description
     release this will be renamed to {\tt minimalPrimes}.
     
     Use @TO "installMinprimes"@ to replace the system versions of 'decompose Ideal', 
-    'minimalPrimes Ideal' and 'isPrime Ideal'.  Warning!  Although this code passes
-    many tests, it has not been used any where near as often as the 'decompose'
-    function in Macaulay2.  However, in many cases the new function is {\it much} faster.
+    'minimalPrimes Ideal' and 'isPrime Ideal'.  In many cases the new function is {\it much} faster,
+    although there are cases when the older, current, version is faster.
 Caveat
   Only works for ideals in (commutative)polynomial rings or quotients of 
     polynomial rings over a prime field, might have bugs in small characteristic and larger degree 
@@ -1535,7 +1534,26 @@ doc ///
      minprimes
 ///
 
-end
+doc ///
+  Key
+    Verbosity
+  Headline
+    optional argument describing how verbose the output should be
+  Description
+   Text
+     Specifying the optional argument {\tt Verbosity => n}, where $n$ is an integer
+     tells the routine how much output should be given.  A value of 0 means be silent.
+     The larger the value $n$, the more output one might see.
+///
+
+
+end--
+
+restart
+uninstallAllPackages()
+installPackage "MinimalPrimes"
+installPackage "IntegralClosure"
+loadPackage "MinimalPrimes"
 
 doc ///
 Key

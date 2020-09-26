@@ -2,29 +2,94 @@
 newPackage(
 	"ExampleSystems",
 	AuxiliaryFiles => true,
-    	Version => "0.1", 
-    	Date => "June, 2016",
-    	Authors => {{
-		Name => "Anton Leykin", 
-		Email => "leykin@math.gatech.edu"
-		}},
+    	Version => "0.5", 
+    	Date => "May 2020",
+    	Authors => {
+               {Name => "Anton Leykin", 
+               Email => "leykin@math.gatech.edu"},
+               {Name => "Justin Chen", 
+               Email => "justin.chen@math.gatech.edu"},
+               {Name => "Kelly Maluccio", 
+               Email => "kmaluccio@math.tamu.edu"},
+               {Name => "Leah Gold", 
+               Email => "L.Gold33@csuohio.edu"}
+        },
 	PackageExports => {"NumericalAlgebraicGeometry"},
-    	Headline => "examples of polynomial systems",
+    	Headline => "database of polynomial systems",
     	DebuggingMode => false
     	)
 
-needsPackage "Text"
-needsPackage "SimpleDoc"
-
 examples'names = {
+    "bellido",
+    "boon",
+    "butcher",
+    "camera1s",
+    "caprasse",
+    "cassou",
+    "chemequ",
+    "cohn3",
+    "comb3000s",
     "cyclic",
+    "dipole2",
+    "eco8",
+    "geneig",
+    "heart",
+    "ipp",
     "katsura",
+    "ku10",
+    "lorentz",
+    "lumped",
+    "noon5",
+    "proddeco",
+    "puma",
+    "quadgrid",
+    "rabmo",
     "randomGeneralizedEigenvalueProblem",
-    "randomSystem"
+    "randomSystem",
+    "rbpl24s",
+    "reimer5",
+    "rose",
+    -- "scurve726",
+    "sendra",
+    "trinks",
+    "virasoro",
+    "wood",
+    "wright"
     }
-
+    
 for e in examples'names do 
 needs("./ExampleSystems/"|e|".m2")
+
+beginDocumentation()
+
+doc ///
+     Key
+          ExampleSystems
+     Headline
+          examples of polynomial systems
+     Description
+          Text
+               This package is a database for examples of polynomial systems in Macaulay2,
+               including standard systems of interest in various applications, such as 
+               engineering, chemistry, robotics, and economics.
+               
+               {\bf References:} 
+          Code
+               UL {
+                    "http://homepages.math.uic.edu/~jan/demo.html",
+                    "http://www-sop.inria.fr/coprin/logiciels/ALIAS/Benches/node1.html",
+                    "http://symbolicdata.org/XMLResources/IntPS/",
+                    "http://www.cecm.sfu.ca/~rpearcea/polsys.txt"
+               }
+///
+
+-- multidoc ///
+ -- Node
+  -- Key
+   -- ExampleSystems
+  -- Headline
+   -- examples of polynomial systems
+-- ///
 
 end
 
@@ -79,7 +144,7 @@ example(ExampleTable, String) := opts -> (H,x) -> (
      else I)
 
 readExampleFile = method()
-{* -- remove this code
+-* -- remove this code
 readExampleFile(String,Ring) := (filename, coeffring) -> (
      G := separateRegexp("---+", get (ExampleIdeals#"source directory"|filename));
      G = apply(G, s -> select(lines s, t -> #t > 0));
@@ -98,10 +163,10 @@ readExampleFile(String) := (filename) -> (
 	       s := substring(2,G#i#0); -- remove the first two -- characters
 	       i+1 => s => demark("\n",drop(G#i,1))))
      )
-*}
+*-
 getExampleFile = method()
 
-{* -- remove this code
+-* -- remove this code
 getExampleFile(String,String) := (filename,kkstring) -> (
      G := separateRegexp("---+", get filename);
      G = apply(G, s -> select(lines s, t -> #t > 0));
@@ -112,7 +177,7 @@ getExampleFile(String,String) := (filename,kkstring) -> (
 	       i+1 => s => replace("kk", kkstring, demark("\n",drop(G#i,1)))))
      )
 getExampleFile(String) := (filename) -> getExampleFile(filename,"")
-*}
+*-
 
 -- New code
 getExampleFile(String) := (filename) -> (

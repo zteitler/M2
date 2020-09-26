@@ -187,11 +187,6 @@ EqualEqualfun(lhs:Code,rhs:Code):Expr := (
      	  y := eval(rhs);
 	  when y is Error do y else EqualEqualfun(x,y)));
 setup(EqualEqualS,EqualEqualfun);
-not(z:Expr):Expr := (
-     when z is Error do z 
-     else if z == True then False 
-     else if z == False then True
-     else buildErrorPacket("expected true or false"));
 
 NotEqualfun(lhs:Code,rhs:Code):Expr := (
      x := eval(lhs);
@@ -783,10 +778,10 @@ Gamma(e:Expr):Expr := (
      );
 setupfun("Gamma",Gamma);
 export lgamma(x:RR):Expr := (
-     z := newRR(precision(x));
+     z := newRRmutable(precision(x));
      i := 0;
-     Ccode( void, "mpfr_lgamma((__mpfr_struct *)", z, ",&",i,",(__mpfr_struct *)", x, ", GMP_RNDN)" );
-     Expr(Sequence(toExpr(z),toExpr(i))));
+     Ccode( void, "mpfr_lgamma((mpfr_ptr)", z, ",&",i,",(mpfr_srcptr)", x, ", GMP_RNDN)" );
+     Expr(Sequence(toExpr(moveToRR(z)),toExpr(i))));
 lgamma(e:Expr):Expr := (
      when e
      is x:RRcell do lgamma(x.v)				    -- # typical value: lgamma, RR, RR
@@ -1548,7 +1543,7 @@ map(e:Expr,f:Expr):Expr := (
 	  )
 --     is obj:HashTable do (
 --	  if obj.Mutable then return WrongArg("an immutable hash table");
---	  if ancestor(obj.Class,Tally) then mapkeys(f,obj) else mapvalues(f,obj))
+--	  if ancestor(obj.Class,VirtualTally) then mapkeys(f,obj) else mapvalues(f,obj))
      is b:List do (
 	  c := map(b.v,f);
 	  when c is err:Error do if err.message == breakMessage then if err.value == dummyExpr then nullE else err.value else c

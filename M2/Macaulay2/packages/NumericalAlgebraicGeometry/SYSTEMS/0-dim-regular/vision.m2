@@ -11,9 +11,9 @@ P2 = for i to n-1 list transpose B#i * E * C#i
 I = ideal P1 + ideal P2
 -- numericalIrreducibleDecomposition I -- takes too long
 R1 = F[drop(gens R,1)]
-{* bug???
+-* bug???
 matrix{{1}}|vars R1
-*}
+*-
 RtoR1 = map(R1,R,matrix{{1_F}}|vars R1)
 PS = polySystem RtoR1 I
 
@@ -49,9 +49,11 @@ PS = polySystem (ideal {P1_(0,0),P1_(0,1),P1_(2,2)} + ideal P2)
 debug NumericalAlgebraicGeometry
 PS.NumberOfVariables = 8 -- hack!!!
 -- squarePS = squareUp PS 
-makeGateMatrix(PS,Parameters=>drop(gens R1,8));  
-PH = parametricSegmentHomotopy PS
-printAsSLP PH.GateHomotopy#"Hx" 
+gPS = gateSystem(PS,drop(gens R1,8));  
+PH = parametricSegmentHomotopy gPS
+--makeGateMatrix(PS,Parameters=>drop(gens R1,8));  
+--PH = parametricSegmentHomotopy PS
+printAsSLP(PH.GateHomotopy#"X"|matrix{{PH.GateHomotopy#"T"}},PH.GateHomotopy#"Hx")
 
 -- start solutions
 BC = matrix{flatten flatten(B/entries) | flatten flatten(C/entries)}

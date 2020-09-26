@@ -46,8 +46,7 @@ newPackage(
       Email => "vqthanh@math.berkeley.edu",
       HomePage => "http://math.berkeley.edu/~thanh"}},
   Headline => "spectral sequences",
-  DebuggingMode => true,
-  PackageImports => {"SimplicialComplexes", "ChainComplexExtras", "PushForward"},
+  PackageImports => {"Truncations"},
   PackageExports => {"SimplicialComplexes", "ChainComplexExtras", "PushForward"}
   )
 
@@ -3488,7 +3487,7 @@ doc ///
      	  E:SpectralSequence
 	  k:InfiniteNumber
      Outputs
-     	  P:Page
+	  P:SpectralSequencePage
      Description
      	  Text 
 	      Returns the infinity page a spectral sequence.

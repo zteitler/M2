@@ -1,15 +1,14 @@
 -- -*- coding: utf-8 -*-
 scan((
      -- some optional arguments
-	  FollowLinks,Hilbert,Options,InstallPrefix,PackagePrefix,Exclude,Encapsulate,CompleteIntersection,MaximalRank,MaxReductionCount,Reverse,
-	  Algorithm,DebuggingMode,Dense,DivideConquer,First,Format,GBDegrees,Hermitian,CoefficientRing,Undo,SourceCode,Description,Variables,
-	  Boxes,BaseRow,HorizontalSpace,VerticalSpace,Alignment,Minimize,FileName,Unmixed,Decompose,AbsoluteLinks,RunExamples,SourceRing,
-	  Inverses,WeylAlgebra,Degrees,MonomialSize,CheckDocumentation,IgnoreExampleErrors,MakeDocumentation,MakeInfo,MakeLinks,
-	  RemakeAllDocumentation,RerunExamples,UserMode,Generic,DegreeRank,Heft,Limit,SizeLimit,StopWithMinimalGenerators,
+	  FollowLinks,Hilbert,Options,Exclude,CompleteIntersection,MaximalRank,MaxReductionCount,Reverse,
+	  Algorithm,Dense,DivideConquer,First,Format,GBDegrees,Hermitian,CoefficientRing,Undo,Description,Variables,
+	  Boxes,BaseRow,HorizontalSpace,VerticalSpace,Alignment,Minimize,Unmixed,Decompose,SourceRing,
+	  Inverses,WeylAlgebra,Degrees,MonomialSize,Generic,DegreeRank,Heft,Limit,SizeLimit,StopWithMinimalGenerators,
 	  StopBeforeComputation,DegreeLimit,BasisElementLimit,SyzygyLimit,PairLimit,CodimensionLimit,Strategy,Syzygies,
-	  ChangeMatrix,SyzygyRows,MinimalMatrix,SyzygyMatrix,Certification,Reload,
-	  KeepZeroes,Heading,ClosestFit,Density,Height,UpperTriangular,EncapsulateDirectory,Local,Binomial,Monomial,DegreeMap,DegreeLift,
-	  Join,CacheExampleOutput,Reduce,Result,SeparateExec),
+	  ChangeMatrix,SyzygyRows,MinimalMatrix,SyzygyMatrix,Certification,
+	  KeepZeroes,ClosestFit,Density,Height,UpperTriangular,Local,Binomial,Monomial,DegreeMap,DegreeLift,
+	  Join,Reduce,Result),
      s -> if s =!= null then document {
 	  Key => s,
 	  Headline => "name for an optional argument",
@@ -28,127 +27,9 @@ scan((
      )
 
 document {
-     Key => "initial help",				    -- display by the help command by default
-     "Welcome to Macaulay2",
-     PARA{},
-     "Try entering '2+2' at your next input prompt, which begins with ", TT "i", ".
-     The two output prompts begin with ", TT "o", ".  The first one, with the
-     equal sign, '=', gives the value computed from your input, and the second one, with
-     the colon, ':', tells what type of thing the value is.",
-     PARA{},
-     "Type one of these commands to get started reading the documentation:",
-     UL {
-     	  SPAN (///copyright///, ///                         -- the copyright///),
-     	  SPAN (///help "Macaulay2"///, ///                  -- top node of the documentation.///),
-     	  SPAN (///help "reading the documentation"///, ///  -- ///),
-     	  SPAN (///help "getting started"///, ///            -- ///),
-     	  SPAN (///help "a first Macaulay2 session"///, ///  -- ///),
-     	  SPAN (///help x///, ///                            -- display the documentation for ///, TT ///x///),
-     	  SPAN (///? f///, ///                               -- display brief documentation for a function ///, TT ///f///),
-	  SPAN (///printWidth = 80///, ///                   -- set print width to 80 characters///),
-     	  SPAN (///viewHelp///, ///                          -- view documentation in a browser///),
-     	  SPAN (///viewHelp x///, ///                        -- view documentation on ///, TT ///x///, /// in browser///),
-	  },
-     "To read the documentation in info form, in case you happen to be running Macaulay2 in a 
-     terminal window, replace ", TO "help", " by ", TO "infoHelp", " in any of the commands 
-     above."
-     }
-document {
-     Key => {help,(help,Array),(help,DocumentTag),(help,List),(help,Sequence),(help,String),(help,Symbol),(help,Thing)},
-     Headline => "help command",
-     "Various ways to get help:",
-     UL {
-     	  (TT "help \"Macaulay2\"", " -- displays the base of the online documentation tree."),
-     	  (TT "help X", " -- displays the online documentation for ", TT "X"),
-	  (TT "help methods X", " -- displays help messages about the methods usable with things of type ", TT "X"),
-	  (TT "help methods res", " -- displays help messages about the methods usable with the function ", TT "res"),
-	  (TT "help methods symbol **", " -- displays help messages about the methods usable with the operator ", TT "**"),
-	  (TT "help methods (res, X)", " -- displays help messages about the methods usable with the function ", TT "res", " and a thing of class ", TT "X"),
-	  (TT "help methods (symbol **, X)", " -- displays help messages about the methods usable with the operator ", TT "**", " and a thing of class ", TT "X"),
-	  (TT "help methods (X, Y)", " -- displays help messages about the methods usable with a thing of class ", TT "X", " and a thing of class ", TT "Y")
-	  },
-     "The ", TT "help", " command is used to display online documentation.  Use ", TO viewHelp, " to display the corresponding
-     documentation in your web browser.",
-     EXAMPLE {
-	  "help",
-	  "help ideal",
-	  "help (ideal,List)"
-	  },
-     "Some other potential help topics:",
-     UL {
-	  -- Mike wanted this: TT "help \"monomial orders\"",
-	  TT "help \"Gröbner bases\"",
-	  TT "help \"multigraded polynomial rings\""
-	  },
-     SeeAlso => {viewHelp, infoHelp,  apropos, code, examples, "reading the documentation"}
-     }
-document {
-     Key => viewHelp,
-     Headline => "view online doc with a web browser",
-     Usage => "viewHelp\nviewHelp s",
-     Inputs => {
-	  "s" => "a descriptor for a documentation node (see below for examples)"
-	  },
-     Consequences => {
-	  {"The given documentation page is displayed in your default web browser.  If
-	  the browser is not running, it is started.  If no argument is given to ", TT "viewHelp", 
-	  "then the top page of your local html documentation is displayed."}},
-     "Some example uses:",
-     UL {
-	  (TT "viewHelp", " -- top of local copy of the documentation, including installed packages"),	  
-	  (TT "viewHelp \"Macaulay2\"", " -- top of Macaulay2 doc"),
-	  (TT "viewHelp ideal", " -- online doc for the 'ideal' function"),
-	  (TT "viewHelp \"matrices\"", " -- overview of matrices in Macaulay2"),
-	  (TT "viewHelp (ideal,List)", " -- online doc for ideal(List) method"),
-	  (TT "viewHelp (diff,Matrix,Matrix)", " -- online doc for the diff function taking two matrices as arguments"),
-	  (TT "viewHelp [gb,DegreeLimit]", " -- view doc for the optional argument DegreeLimit to gb function"),
-	  (TT "viewHelp (symbol**,Matrix,Matrix)", " -- view doc for Matrix**Matrix")
-	  },
-     Caveat => {"The ", TO help, " command allows other possible arguments, such as ", 
-	  TT "help methods ideal", ", but for ", TT "viewHelp", " the argument ", TT "s",
-	  " must refer to ony one web page."},
-     SeeAlso => {apropos, examples, help, infoHelp, "reading the documentation"}
-     }
-document {
-     Key => infoHelp,
-     Headline => "view online doc with info",
-     Usage => "infoHelp s",
-     Inputs => {
-	  "s" => "a descriptor for a documentation node (see below for examples)"
-	  },
-     Consequences => {
-	  "The given documentation page is displayed using info, if you are running
-	  Macaulay2 in a terminal window."},
-     "Some example uses:",
-     UL {
-	  (TT "infoHelp \"Macaulay2\"", " -- top of Macaulay2 doc"),
-	  (TT "infoHelp ideal", " -- online doc for the 'ideal' function"),
-	  (TT "infoHelp \"matrices\"", " -- overview of matrices in Macaulay2"),
-	  (TT "infoHelp (ideal,List)", " -- online doc for ideal(List) method"),
-	  (TT "infoHelp (diff,Matrix,Matrix)", " -- online doc for the diff function taking two matrices as arguments"),
-	  (TT "infoHelp [gb,DegreeLimit]", " -- view doc for the optional argument DegreeLimit to gb function"),
-	  (TT "infoHelp (symbol**,Matrix,Matrix)", " -- view doc for Matrix**Matrix")
-	  },
-     "While in the ", TT "info", " program, there are many ways to navigate and search.
-     Besides the arrow keys to move around on the page, here is a list of the most useful key strokes:",
-     UL {
-	  (TT "?", " -- display information about all of the possible keystrokes"),
-	  (TT "q", " -- quit info, return to Macaulay2"),
-	  (TT "n", " -- go to the next documentation node"),
-	  (TT "p", " -- go to the revious node"),
-	  (TT "m", " -- follow the menu link"),
-	  (TT "r", " -- follow a cross-reference"),
-	  (TT "l", " -- go to the last node visited"),
-	  },
-     Caveat => {"The ", TO help, " command allows other possible arguments, such as ", 
-	  TT "help methods ideal", ", but ", TT "infoHelp", " requires that the argument ", TT "s",
-	  " refers to only one documentation page."},
-     SeeAlso => {apropos, examples, help, viewHelp, "reading the documentation"}
-     }
-document {
      Key => lookup,
      Headline => "look up methods",
-     TT "lookup(M,A)", " -- provides the binary method named ", TT "M", " for class ", TT "A", ".
+     TT "lookup(M,A)", " -- provides the unary method named ", TT "M", " for class ", TT "A", ".
      The first place to look is ", TT "A#M", ".  The search proceeds with
      the parent of ", TT "A", ", and so on.",
      PARA{},
@@ -178,8 +59,8 @@ document {
      Headline => "install methods",
      PARA{"Most users will use a different way of installing methods."},
      PARA{
-	  TT "installMethod(M,f)", "     -- installs a function ", TT "f", " as a unary method for
-	  the class ", TT "A", " under the name ", TT "M", ".  This is a replacement for the syntax ", "M () := f", ",
+	  TT "installMethod(M,f)", "     -- installs a function ", TT "f", " as a nullary method
+	  under the name ", TT "M", ".  This is a replacement for the syntax ", "M () := f", ",
 	  which hasn't yet been made to work.  As currently implemented, this is also the same 
 	  as ", TT "nullaryMethods#(1:M) = f", "."
 	  },
@@ -236,21 +117,13 @@ document {
 undocumented {
      (NewFromMethod, Command, String),
      (NewFromMethod, Command, Function),
-     (NewFromMethod, BR, List),
-     (NewFromMethod, DocumentTag, List),
-     (NewFromMethod, HR, List),
      (NewFromMethod, HREF, List),
-     (NewFromMethod, MarkUpType, List),
      (NewFromMethod, Module, List),
      (NewFromMethod, TO, List),
      (NewFromMethod, TO2, List),
      (NewFromMethod, TOH, List),
-     (NewFromMethod, MarkUpType, Sequence),
      (NewFromMethod, Module, Sequence),
      (NewFromMethod, TO2, Sequence),
-     (NewFromMethod, TO, Hypertext),
-     (NewFromMethod, TOH, Hypertext),
-     (NewFromMethod, MarkUpType, Thing),
      (NewFromMethod, Matrix, MutableMatrix),
      (NewFromMethod, Matrix, Vector),
      (NewFromMethod, MutableMatrix, Matrix),
@@ -413,87 +286,6 @@ document {
      TT "isIsomorphism f", " -- whether the map f of modules is an isomorphism."
      }
 document {
-     Key => {leadCoefficient,(leadCoefficient, RingElement)},
-     Headline => "the leading coefficient",
-     TT "leadCoefficient f", " -- return the leading coefficient of the polynomial
-     or vector ", TT "f", ".",
-     PARA{},
-     SeeAlso => {"leadTerm", "leadMonomial", "leadComponent"}
-     }
-document {
-     Key => {leadComponent,(leadComponent, Matrix),(leadComponent, Vector)},
-     Headline => "the leading component of a vector or matrix",
-     TT "leadComponent f", " -- return the leading component of the vector f,
-     i.e., the integer i so that f_i is the first nonzero component of f.",
-     PARA{},
-     SeeAlso => {"leadTerm", "leadCoefficient", "leadMonomial"}
-     }
-document {
-     Key => {leadMonomial,(leadMonomial, RingElement)},
-     Headline => "the leading monomial",
-     TT "leadMonomial f", " -- return the leading monomial of the polynomial
-     or vector f, as a ring element.  (Warning: in version 0.9.2, a
-     monoid element was returned.)",
-     PARA{},
-     SeeAlso => {"leadTerm", "leadCoefficient", "leadCoefficient"}
-     }
-document {
-     Key => {flatten,(flatten, VisibleList)},
-     Headline => "flatten a list by unnesting lists",
-     TT "flatten m", " -- produces a new list from ", TT "m", " by
-     effectively removing the braces surrounding the elements
-     of any elements of ", TT "m", " that happen to be lists.  Also works
-     for matrices.",
-     PARA{},
-     EXAMPLE "flatten {{2,3,4},{{5}},6}"
-     }
-document {
-     Key => (flatten,Matrix),
-     Headline => "puts the columns of a matrix into a single row",
-	Usage => "g = flatten f",
-	Inputs => {
-		"f" => {"a ", TT "m", " by ", TT "n", " matrix."}
-		},
-	Outputs => {
-		"g" => { "a ", TT "1", " by ", TT "m*n", " matrix."}
-		},
-     TT "flatten f", " produces a new matrix from ", TT "f", " by placing the entries of the columns of ", TT "f", " all in a single row, one after the other.",
-     EXAMPLE {
-		"R = ZZ/101[x,y,z];",
-		"f = matrix {{2, x},{y^2, 23},{z, z^3}}",
-		"flatten f"
-		},
-	"Note that this is the matrix given by unnesting the list that was used to enter the matrix.",
-     }
-document {
-     Key => {image,(image, Matrix),(image, ChainComplexMap),(image, GradedModuleMap),(image, RingElement)},
-     Headline => "image of a map",
-     TT "image h", " -- yields the image of the homomorphism ", TT "h", ".",
-     PARA{},
-     "The result will be a submodule of the target of h",
-     PARA{},
-     "If h is a ring element, it is interpreted as a one by one matrix."
-     }
-
-document {
-     Key => {scanKeys,(scanKeys, Database, Function),(scanKeys, HashTable, Function)},
-     Headline => "apply a function to each key in a hash table or database",
-     TT "scanKeys(x,f)", " -- apply the function ", TT "f", " to each key used in the
-     hash table or database ", TT "x", ".",
-     PARA{},
-     "This function requires an immutable hash table.  To scan the keys in
-     a mutable hash table, use ", TT "scan(keys x, f)", "."
-     }
-document {
-     Key => {scanValues,(scanValues, HashTable, Function)},
-     Headline => "apply a function to each value in a hash table",
-     TT "scanValues(x,f)", " -- apply the function ", TT "f", " to each value
-     appearing in the hash table ", TT "x", ".",
-     PARA{},
-     "This function requires an immutable hash table.  To scan the values in
-     a mutable hash table, use ", TT "scan(values x, f)", "."
-     }
-document {
      Key => GlobalAssignHook,
      Headline => "hook for assignment to global variables",
      Usage => "X.GlobalAssignHook = f",
@@ -548,29 +340,6 @@ document {
      spots in a chain complex are actually occupied by modules or maps."
      }
 document {
-     Key => (drop, BasicList, List),
-     Usage => "drop(v,{m,n})",
-     Inputs => { "v", Nothing => { TT "{m,n}", ", a pair of natural numbers" } },
-     Outputs => { { "the list obtained by omitting those elements of the list ", TT "v", " in positions ", TT "m", " through ", TT "n" } },
-     SeeAlso => {(take, BasicList, List)},
-     EXAMPLE "drop({a,b,c,d,e},{2,4})"
-     }
-document {
-     Key => (drop, BasicList, ZZ),
-     Usage => "w = drop(v,n)",
-     Inputs => {
-	  "v",
-	  "n"
-	  },
-     Outputs => {
-	  {"the list obtained by omitting the first ", TT "n", " elements of the list ", TT "v", " if ", TT "n", " is positive, or
-	       the last ", TT "-n", " elements if ", TT "n", " is negative."}
-	  },
-     EXAMPLE { "drop({a,b,c,d,e},2)", "drop({a,b,c,d,e},-2)" }
-     }
-document { Key => drop,
-     Headline => "drop some elements from a list or sequence", SeeAlso => "take" }
-document {
      Key => {(options, Function),(options, Command),(options, Sequence)},
      Headline => "get optional arguments and default values for a function that accepts them",
      Usage => "options f",
@@ -604,157 +373,6 @@ document {
 document {
      Key => options,
      Headline => "get options" }
-
-document {
-     Key => symbol #,
-     Headline => "length, or access to elements",
-     "The precedence of ", TT "#", " when used as a binary operator is high,
-     as high as ", TT ".", ", but the precedence when used as a unary operator
-     is lower, as low as adjacency or function application.",
-     SeeAlso =>{ "#?" }
-     }
-document {
-     Key => (symbol #, BasicList),
-     Headline => "length",
-     TT "#x", " -- provides the length of a list.",
-     }
-document {
-     Key => (symbol #, HashTable),
-     Headline => "length",
-     TT "#x", " -- provides the number of key-value pairs recorded
-     in a hash table.",
-     }
-document {
-     Key => (symbol #, Set),
-     Headline => "cardinality",
-     TT "#x", " -- provides the number of elements in the set ", TT "x", "."
-     }
-document {
-     Key => (symbol #, String),
-     Headline => "length",
-     TT "#x", " -- provides the length of a string.",
-     }
-document {
-     Key => (symbol #, HashTable, Thing),
-     Headline => "get value from hash table",
-     TT "x#i", " -- provides the value associated to the key ", TT "i", " in the hash table
-     ", TT "x", ".",
-     PARA{},
-     "Assignment to ", TT "x#i", " can change the value if ", TT "x", " is mutable.",
-     EXAMPLE {
-	  "x = new MutableHashTable",
-	  "x#i = p",
-	  "x#i",
-	  },
-     SeeAlso => {(symbol #?, HashTable, Thing), "hashing"}
-     }
-document {
-     Key => (symbol #, Database, String),
-     Headline => "get value from database",
-     TT "x#i", " -- provides the value associated to the key ", TT "i", " in the database
-     ", TT "x", ".",
-     SeeAlso => {(symbol #?, Database, String)}
-     }
-document {
-     Key => (symbol #, String, ZZ),
-     Headline => "get character from string",
-     TT "x#i", " -- provides the ", TT "i", "-th character of the string ", TT "x", ",
-     as a string of length 1, if there is one.",
-     PARA{},
-     "If ", TT "i", " is out of range, a string of length 0 is returned.
-     If  ", TT "i", " is negative, then the ", TT "i", "-th character
-     from the end is provided.",
-     SeeAlso => {(symbol #?, String, ZZ)}
-     }
-document {
-     Key => (symbol #, BasicList, ZZ),
-     Headline => "get element from list",
-     Usage => "x#i",
-     Inputs => { "x", "i" },
-     Outputs => { { "the ", TT "i", "-th element of the list ", TT "x" }},
-     SeeAlso => {(symbol _, VisibleList, ZZ)},
-     PARA{
-     	  "The entries of the list are numbered starting with 0.  If  ", TT "i", " 
-          is negative, then the ", TT "i", "-th entry counting from the end is provided.
-          If ", TT "i", " is out of range, an error is signaled." },
-     PARA{
-	  "Assignment to ", TT "x#i", " can change the value if ", TT "x", " is
-          mutable, i.e., an instance of the class ", TO "MutableList", "." },
-     EXAMPLE lines ///
-          x = a .. z
-	  x#12
-	  y = new MutableList from x
-	  y#12 = foo
-	  toSequence y
-     ///
-     }
-document {
-     Key => (symbol #?, HashTable, Thing),
-     Headline => "check for value in hash table",
-     TT "x#?i", " -- tells whether there is a value associated to the
-     key ", TT "i", " stored in the hash table ", TT "x", ".",
-     SeeAlso => {(symbol #, HashTable, Thing), "hashing"}
-     }
-document {
-     Key => (symbol #?, Database, String),
-     Headline => "check for value in database",
-     TT "x#?i", " -- tells whether there is a value associated to the string
-     ", TT "i", " in the database ", TT "x", ".",
-     SeeAlso => {(symbol #, Database, String)}
-     }
-document {
-     Key => (symbol #?, String, ZZ),
-     Headline => "check for character in string",
-     TT "x#?i", " -- tells whether there is an ", TT "i", "-th character in
-     the string ", TT "x", ".",
-     EXAMPLE {
-	  ///"asdf" #? 2///,
-	  ///"asdf" #? 22///
-	  },
-     SeeAlso => {(symbol #, String, ZZ)}
-     }
-document {
-     Key => (symbol #?, BasicList, ZZ),
-     Headline => "check for element in list",
-     TT "x#?i", " --  tells whether there is an ", TT "i", "-th element in
-     the list ", TT "x", ".",
-     EXAMPLE {
-	  ///{a,b,c} #? 2///,
-	  ///{a,b,c} #? 22///
-	  },
-     SeeAlso => {(symbol #, BasicList, ZZ)}
-     }
-document {
-     Key => symbol #?,
-     Headline => "check for presence of elements",
-     SeeAlso =>{ "#" }
-     }
-
-document {
-     Key => ".",
-     Headline => "access to elements whose key is a symbol",
-     TT "x.k", " -- the same as ", TT "x#(global k)", ", i.e., treat ", TT "k", " as
-     a global symbol and provide the value stored in the hash table ", TT "x", " 
-     under the key ", TT "k", ".",
-     PARA{},
-     "May also be used in an assignment.",
-     PARA{},
-     EXAMPLE {
-	  "x = new MutableHashTable;",
-      	  "x.k = 444",
-      	  "x.k",
-      	  "peek x",
-	  },
-     SeeAlso => {"#", ".?", "global"}
-     }
-document {
-     Key => ".?",
-     Headline => "check for presence of elements whose key is a symbol",
-     TT "x.?k", " -- the same as ", TT "x#?(global k)", ", tells whether a value is
-     available with ", TT "x.k", ".",
-     PARA{},
-     SeeAlso =>{ ".", "#?" }
-     }
 
 undocumented {(autoload, Function, String)}
 document {

@@ -323,7 +323,7 @@ jumpingNumbers CentralArrangement := o -> A -> jumpingNumbers(sequence A, o)
 -- VIA DMODULES ----------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-{*
+-*
   Unfortunately it is extremely difficult to acheive
   compatibility with both Dmodules and HyperplaneArrangements,
   due primarily to conflicts in definitions of the method
@@ -345,15 +345,15 @@ jumpingNumbers CentralArrangement := o -> A -> jumpingNumbers(sequence A, o)
   
   (Note this is the current emphasis, not necessarily the long-term
   goal of this package.)
-*}
+*-
 
 --------------------------------------------------------------------------------
 -- MONOMIAL IDEALS -------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-{*
+-*
   Code in this section written by Zach Teitler 2010, 2011, 2012
-*}
+*-
 
 -- NewtonPolyhedron
 -- compute a matrix A such that Ax >= 0 defines the cone over
@@ -598,10 +598,10 @@ jumpingDenominators (MonomialIdeal) := I -> (
 -- MONOMIAL CURVES -------------------------------------------------------------
 --------------------------------------------------------------------------------
 
-{*
+-*
   Code in this section written by Claudiu Raicu, Bart Snapp,
   Zach Teitler 2011, 2012
-*}
+*-
 
 -- affineMonomialCurveIdeal
 --
@@ -1687,7 +1687,7 @@ TEST ///
 beginDocumentation()
 document { 
   Key => MultiplierIdeals,
-  Headline => "A package for computing multiplier ideals",
+  Headline => "multiplier ideals",
   PARA {
     EM "MultiplierIdeals",
     " is a package for computing multiplier ideals,

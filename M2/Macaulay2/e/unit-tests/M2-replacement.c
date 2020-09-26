@@ -67,13 +67,15 @@ M2_string M2_tostringn(char *s, int n)
 
 M2_string (*gmp_tonetCCparenpointer)(gmp_CC);
 M2_string (*gmp_tonetCCpointer)(gmp_CC);
-M2_string (*gmp_tostringRRpointer)(__mpfr_struct *);
+M2_string (*gmp_tostringRRpointer)(mpfr_srcptr);
 
 
 char newline[] = "\n";
 
 int M2_gbTrace = 0;
 int M2_numericalAlgebraicGeometryTrace = 0;
+
+struct FUNCTION_CELL *thread_prepare_list;
 
 /*
  Local Variables:

@@ -22,13 +22,14 @@ class RingElement;
 class RingMap;
 class Computation;
 class EngineComputation;
+class MutableComplex;
 // NAG begin
-class SLEvaluator;
-class Homotopy;
-class SLProgram;
+class M2SLEvaluator;
+class M2Homotopy;
+class M2SLProgram;
 class StraightLineProgram;
 class PathTracker;
-class PointArray;
+class M2PointArray;
 // NAG end
 
 typedef struct MonomialOrdering MonomialOrdering;
@@ -46,13 +47,14 @@ typedef struct Computation Computation;
 typedef struct EngineComputation EngineComputation;
 typedef struct MonomialOrdering MonomialOrdering;
 typedef struct MonomialIdeal MonomialIdeal;
+typedef struct MutableComplex MutableComplex;
 // NAG begin
-typedef struct SLEvaluator SLEvaluator;
-typedef struct Homotopy Homotopy;
-typedef struct SLProgram SLProgram;
+typedef struct M2SLEvaluator M2SLEvaluator;
+typedef struct M2Homotopy M2Homotopy;
+typedef struct M2SLProgram M2SLProgram;
 typedef struct StraightLineProgram StraightLineProgram;
 typedef struct PathTracker PathTracker;
-typedef struct PointArray PointArray;
+typedef struct M2PointArray M2PointArray;
 // NAG end
 #endif
 
@@ -71,6 +73,16 @@ extern "C" {
 
   M2_string engineMemory(); /* connected MES to engineMemory */
 
+  /*****************************************************/
+  /**** Integer primality and factorization (via flint)*/
+  /*****************************************************/
+
+  M2_bool rawZZisPrime(gmp_ZZ a);
+
+  M2_bool rawZZisProbablePrime(gmp_ZZ a);
+
+  gmp_arrayZZ rawZZfactor(gmp_ZZ a);
+  
   /**************************************************/
   /**** Monomial routines ***************************/
   /**************************************************/
@@ -167,6 +179,8 @@ extern "C" {
   M2_string IM2_Monoid_to_string(const Monoid *M);  /* drg: connected */
     /* For debugging purposes */
 
+  int rawMonoidNumberOfBlocks(const Monoid *M); /* connected rawMonoidNumberOfBlocks */
+  
   /**************************************************/
   /**** ARing routines ******************************/
   /**************************************************/
@@ -296,7 +310,7 @@ extern "C" {
   const Ring /* or null */ *IM2_Ring_frac(const Ring *R); /* drg: connected rawFractionRing*/
 
   const Ring /* or null */ *IM2_Ring_localization(const Ring *R,
-                                          const Matrix *P); /* drg: connected rawLocalRing */
+                                          Computation *P); /* drg: connected rawLocalRing */
   /* Create the localization of R.
      R should be a COMMUTATIVE ring.  P should be a one row matrix
      whose entries generate a prime ideal of R.
@@ -369,7 +383,7 @@ extern "C" {
                                                   gmp_ZZ d);  /* drg: connected rawFromNumber*/
 
   const RingElement /* or null */ *IM2_RingElement_from_rational(const Ring *R,
-                                                         gmp_QQ r); /* rawFromNumber*/
+                                                         mpq_srcptr r); /* rawFromNumber*/
 
   gmp_ZZ /* or null */ IM2_RingElement_to_Integer(const RingElement *a); /* drg: connected rawToInteger*/
     /* If the ring of a is ZZ, or ZZ/p, this returns the underlying representation.
@@ -443,6 +457,9 @@ extern "C" {
      this implements the (anti-)isomorphism of the ring and its opposite ring.
   */
 
+  const Matrix* /* or null */ rawHomogenizeMatrix(const Matrix* a, const Matrix* b, const Matrix* c);
+  /* TEST dummy function!! */
+  
   const RingElement /* or null */ *IM2_RingElement_homogenize_to_degree(
             const RingElement *a,
             int v,
@@ -618,7 +635,7 @@ extern "C" {
      This then translates F, returning the translated poly in the ring newRing.
   */
 
-  const RingElement /* or null */ *rawPowerMod(const RingElement *f, mpz_ptr n, const RingElement *g);  /* connected */
+  const RingElement /* or null */ *rawPowerMod(const RingElement *f, mpz_srcptr n, const RingElement *g);  /* connected */
   /* Currently only valid for tower rings */
 
   /**************************************************/
@@ -1466,6 +1483,27 @@ extern "C" {
      A encodes both the L and the U part, as in lapack.
    */
 
+  /**
+     Hi, this is rawLUincremental.
+
+     Returns the permutation array: we need to be more precise which one.
+     Given (first m columns of PLU = first m columns of A (not given), and
+     given the (m+1)-st column of A, then returns a Q, modified from P,
+     and changes LU (which encodes L and U)
+     s.t.  (first (m+1) columns of QLU = first (m+1) columns of A (not given)
+     Note: LU encodes L and U in the usual manner: lower triangular part is L,
+     diagonal of L is all ones, and U is the upper triangular part.
+  */
+  M2_arrayintOrNull rawLUincremental(M2_arrayintOrNull P, /* constant */
+                                     MutableMatrix *LU, /* modified in routine */
+                                     const MutableMatrix *v, /* constant */
+                                     int m);
+
+  void rawTriangularSolve(MutableMatrix *Lv, /* modified in routine */
+                          MutableMatrix *x, /* modified in routine */
+                          int m,
+                          int strategy);
+
   M2_bool rawEigenvalues(MutableMatrix *A,
                          MutableMatrix *eigenvalues,
                          M2_bool isHermitian); /* connected */
@@ -1494,7 +1532,37 @@ extern "C" {
   /* Case 1: A is a dense matrix over RR.  Then so are b,x.
      Case 2: A is a dense matrix over CC.  Then so are b,x. */
 
+  M2_bool rawQR(const MutableMatrix* A, /* input m x n matrix */
+                MutableMatrix* Q, /* output m x n orthonormal columns matrix */
+                MutableMatrix* R, /* output R matrix: upper triangular, nonsingular if A has ker A = 0 */
+                M2_bool return_QR); /* if false, the output is instead the lapack encoded Householder transformations */
+  /* if return_QR is false, then Q will contain the encoded Householder reflections
+     and the multipliers tau_i will appear in R.
+     MES TODO: be more specific here, once we know the exact format!
+  */
 
+  /**************************************************/
+  /**** Mutable Complex routines ********************/
+  /**************************************************/
+
+  M2_string rawMutableComplexToString(const MutableComplex *M);
+
+  unsigned int  rawMutableComplexHash(const MutableComplex *M);
+
+  MutableComplex* rawMutableComplex(const engine_RawMutableMatrixArray M);
+
+  M2_arrayint rawPruneBetti(MutableComplex* C, int n, int f);
+
+  MutableComplex* rawPruneComplex(MutableComplex* C, int n, int f);
+
+  engine_RawMutableMatrixArray rawPruningMorphism(MutableComplex* C, int n, int f);
+
+  /**************************************************/
+  /**** Local Ring routines *************************/
+  /**************************************************/
+
+  Matrix * rawLiftLocalMatrix(const Ring * R, const Matrix *m);
+  M2_bool  rawIsLocalUnit(const RingElement *f);
 
   /**************************************************/
   /**** Monomial ideal routines *********************/
@@ -1607,30 +1675,43 @@ extern "C" {
   /**** Groebner basis and resolution routines ******/
   /**************************************************/
 
-enum ComputationStatusCode
-{
-  /* we include ../e in the path here, just so we can include it from ../d as well as from . */
-#include "statuscodes.h"
-};
+  enum ComputationStatusCode {
+    /* Keep this enum in sync with RawStatusCodes in Macaulay2/m2/gb.m2 */
+    COMP_NEED_RESIZE = 1,         /* need resize */
+    COMP_ERROR = 2,               /* error */
+    COMP_INTERRUPTED = 3,         /* interrupted */
+    COMP_NOT_STARTED = 4,         /* not started */
+    COMP_INITIAL_STOP = 5,        /* StopBeforeComputation */
+    COMP_DONE = 6,                /* done */
+    COMP_DONE_DEGREE_LIMIT = 7,   /* DegreeLimit */
+    COMP_DONE_LENGTH_LIMIT = 8,   /* LengthLimit */
+    COMP_DONE_SYZYGY_LIMIT = 9,   /* SyzygyLimit */
+    COMP_DONE_PAIR_LIMIT = 10,    /* PairLimit */
+    COMP_DONE_GB_LIMIT = 11,      /* BasisElementLimit */
+    COMP_DONE_SYZ_LIMIT = 12,     /* SyzygyLimit */
+    COMP_DONE_CODIM = 13,         /* CodimensionLimit */
+    COMP_DONE_MIN_GENS = 14,      /* StopWithMinimalGenerators */
+    COMP_DONE_STEPS = 15,         /* StepLimit */
+    COMP_DONE_SUBRING_LIMIT = 16, /* SubringLimit */
+    COMP_COMPUTING = 17,          /* computing */
+    COMP_OVERFLOWED = 18,         /* overflowed */
+  };
 
-enum StrategyValues
-  {
+  enum StrategyValues {
     STRATEGY_LONGPOLYNOMIALS = 1,
     STRATEGY_SORT = 2,
     STRATEGY_USE_HILB = 4,
     STRATEGY_USE_SYZ = 8
   };
 
-enum Algorithms
-  {
+  enum Algorithms {
     GB_polyring_field = 1, /* The main GB algorithm to use */
     GB_polyring_field_homog = 2
   };
 
-enum gbTraceValues
-  {
+  enum gbTraceValues {
     /* The printlevel flags */
-    PRINT_SPAIR_TRACKING=1024
+    PRINT_SPAIR_TRACKING = 1024
   };
 
   Computation /* or null */* IM2_Computation_set_stop(Computation *G,
@@ -1778,6 +1859,19 @@ enum gbTraceValues
   MutableMatrix /* or null */ *rawResolutionGetMatrix2(Computation *G,int level,int degree);
   /* rawResolutionGetMatrix2 */
 
+  // This might be temporary!
+  MutableMatrix /* or null */ *
+  rawResolutionGetMutableMatrixB(Computation *C,
+                                 const Ring* R, // A polynomial ring with coeffs = RR, or a finite field used in C, same monoid as C's ring.
+                                 int level);
+
+  // This might be temporary!
+  MutableMatrix /* or null */ *
+  rawResolutionGetMutableMatrix2B(Computation *C,
+                           const Ring* KK, // should be RR, or a finite field used in C.
+                           int level,
+                           int degree);
+
   const FreeModule /* or null */ *rawResolutionGetFree(Computation *G, int level);
     /*drg: connected rawResolutionGetFree*/
 
@@ -1824,23 +1918,23 @@ enum gbTraceValues
 
   const RingElement * rawRingElementCRA(const RingElement *f,
                                         const RingElement *g,
-                                        mpz_t m,
-                                        mpz_t n);
+                                        mpz_srcptr m,
+                                        mpz_srcptr n);
 
   const Matrix * rawMatrixCRA(const Matrix *f,
                               const Matrix *g,
-                              mpz_t m,
-                              mpz_t n);
+                              mpz_srcptr m,
+                              mpz_srcptr n);
 
   const RingElement * rawRingElementRatConversion(const RingElement *f,
-                                  mpz_t m,
+                                  mpz_srcptr m,
                                   const Ring *RQ);
 
   // f should be an element in the polynomial ring R (over ZZ).
   // RQ should be the same ring as R, but with rational coefficients
 
   const Matrix * rawMatrixRatConversion(const Matrix *f,
-                                        mpz_t m,
+                                        mpz_srcptr m,
                                         const Ring *RQ);
   // f should be a matrix in the polynomial ring R (over ZZ).
   // RQ should be the same ring as R, but with rational coefficients
@@ -1910,7 +2004,8 @@ enum gbTraceValues
   /**** Specialized operations **********************/
   /**************************************************/
 
-  Matrix /* or null */ * rawSubduction(const Matrix *M,
+  Matrix /* or null */ * rawSubduction(int numparts,
+                                       const Matrix *M,
                                const RingMap *F,
                                Computation *C);
   /*
@@ -1920,7 +2015,9 @@ enum gbTraceValues
     F should be a ring map R --> R, sending y_i to f_i.
     M should be a matrix over the ring R, usually only involving the variables in the f_i.
     R should be a ring containing the variables of the f_i, and the variables y_i,
-      with a monomial order eliminating the first set of variables
+      with a monomial order eliminating the first set of variables (which is 'numparts' parts of the
+      monomial ordering).
+    numparts: number of parts in the monomial order of the original ring.
    The resulting matrix will have no monomials which are in the subalgebra
    generated by the monomials m_i, and each entry of M and the corresponding entry of the
    result differ by an element of the subalgebra generated by the f_i.
@@ -1988,19 +2085,20 @@ enum gbTraceValues
   gmp_RRorNull rawRingElementNorm(gmp_RR p, const RingElement *f);
   gmp_RRorNull rawMutableMatrixNorm(gmp_RR p, const MutableMatrix *M);
 
-  Homotopy /* or null */ *rawHomotopy(SLEvaluator *Hx, SLEvaluator *Hxt, SLEvaluator *HxH);
-  SLEvaluator /* or null */ *rawSLEvaluator(SLProgram *SLP, M2_arrayint constsPos, M2_arrayint varsPos, const MutableMatrix *consts);
-  SLEvaluator /* or null */ *rawSLEvaluatorSpecialize(SLEvaluator* H, const MutableMatrix *parameters);
-  SLProgram /* or null */ *rawSLProgram(unsigned long nConstantsAndInputs);
-  M2_string rawSLEvaluatorToString(SLEvaluator *); /* connected */
-  M2_bool rawSLEvaluatorEvaluate(SLEvaluator *sle, const MutableMatrix *inputs, MutableMatrix *outputs);
-  M2_string rawHomotopyToString(Homotopy *); /* connected */
-  M2_string rawSLProgramToString(SLProgram *); /* connected */
-  unsigned int rawSLEvaluatorHash(SLEvaluator *); /* connected */
-  unsigned int rawHomotopyHash(Homotopy *); /* connected */
-  unsigned int rawSLProgramHash(SLProgram *); /* connected */
+  // NAG begin
+  M2Homotopy /* or null */ *rawHomotopy(M2SLEvaluator *Hx, M2SLEvaluator *Hxt, M2SLEvaluator *HxH);
+  M2SLEvaluator /* or null */ *rawSLEvaluator(M2SLProgram *SLP, M2_arrayint constsPos, M2_arrayint varsPos, const MutableMatrix *consts);
+  M2SLEvaluator /* or null */ *rawSLEvaluatorSpecialize(M2SLEvaluator* H, const MutableMatrix *parameters);
+  M2SLProgram /* or null */ *rawSLProgram(unsigned long nConstantsAndInputs);
+  M2_string rawSLEvaluatorToString(M2SLEvaluator *); /* connected */
+  M2_bool rawSLEvaluatorEvaluate(M2SLEvaluator *sle, const MutableMatrix *inputs, MutableMatrix *outputs);
+  M2_string rawHomotopyToString(M2Homotopy *); /* connected */
+  M2_string rawSLProgramToString(M2SLProgram *); /* connected */
+  unsigned int rawSLEvaluatorHash(M2SLEvaluator *); /* connected */
+  unsigned int rawHomotopyHash(M2Homotopy *); /* connected */
+  unsigned int rawSLProgramHash(M2SLProgram *); /* connected */
 
-  M2_bool rawHomotopyTrack(Homotopy *H, const MutableMatrix *inputs, MutableMatrix *outputs,
+  M2_bool rawHomotopyTrack(M2Homotopy *H, const MutableMatrix *inputs, MutableMatrix *outputs,
                            MutableMatrix* output_extras,  
                            gmp_RR init_dt, gmp_RR min_dt,
                            gmp_RR epsilon, // o.CorrectorTolerance,
@@ -2008,12 +2106,12 @@ enum gbTraceValues
                            gmp_RR infinity_threshold,
                            M2_bool checkPrecision);
 
-  gmp_ZZ rawSLPInputGate(SLProgram *S);
-  gmp_ZZ rawSLPSumGate(SLProgram *S, M2_arrayint a);
-  gmp_ZZ rawSLPProductGate(SLProgram *S, M2_arrayint a);
-  gmp_ZZ rawSLPDetGate(SLProgram *S, M2_arrayint a);
-  gmp_ZZ rawSLPsetOutputPositions(SLProgram *S, M2_arrayint a);
-  gmp_ZZ rawSLPDivideGate(SLProgram *S, M2_arrayint a);
+  gmp_ZZ rawSLPInputGate(M2SLProgram *S);
+  gmp_ZZ rawSLPSumGate(M2SLProgram *S, M2_arrayint a);
+  gmp_ZZ rawSLPProductGate(M2SLProgram *S, M2_arrayint a);
+  gmp_ZZ rawSLPDetGate(M2SLProgram *S, M2_arrayint a);
+  gmp_ZZ rawSLPsetOutputPositions(M2SLProgram *S, M2_arrayint a);
+  gmp_ZZ rawSLPDivideGate(M2SLProgram *S, M2_arrayint a);
 
   StraightLineProgram /* or null */ *rawSLP(const Matrix *consts, M2_arrayint program);
   const Matrix /* or null */ *rawEvaluateSLP(StraightLineProgram *SLP, const Matrix *vals);
@@ -2044,15 +2142,16 @@ enum gbTraceValues
   gmp_RRorNull rawGetSolutionLastTvaluePT(PathTracker* PT, int solN);
   gmp_RRorNull rawGetSolutionRcondPT(PathTracker* PT, int solN);
   const Matrix /* or null */ *rawRefinePT(PathTracker* PT, const Matrix* sols, gmp_RR tolerance, int max_corr_steps_refine);
-  // PointArray
-  unsigned int rawPointArrayHash(PointArray *); 
-  M2_string rawPointArrayToString(PointArray *);
-  PointArray /* or null */ *rawPointArray(double epsilon, int n);
-  int rawPointArrayLookup(PointArray *pa, const MutableMatrix *M, int col);
-  int rawPointArrayLookupOrAppend(PointArray *pa, const MutableMatrix *M, int col);
+  // M2PointArray
+  unsigned int rawPointArrayHash(M2PointArray *); 
+  M2_string rawPointArrayToString(M2PointArray *);
+  M2PointArray /* or null */ *rawPointArray(double epsilon, int n);
+  int rawPointArrayLookup(M2PointArray *pa, const MutableMatrix *M, int col);
+  int rawPointArrayLookupOrAppend(M2PointArray *pa, const MutableMatrix *M, int col);
   // NAG end  
   const Matrix /* or null */ *rawGbBoolean(const Matrix *m);
   const Matrix /* or null */ *rawBIBasis(const Matrix* m, int toGroebner);
+
 #if defined(__cplusplus)
 }
 #endif

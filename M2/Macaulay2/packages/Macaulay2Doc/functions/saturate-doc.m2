@@ -93,7 +93,7 @@ document {
      "The computation is currently not stored anywhere: this means
      that the computation cannot be continued after an interrupt.
      This will be changed in a later version.",
-     SeeAlso => {quotient, "PrimaryDecomposition"}
+     SeeAlso => {quotient, "PrimaryDecomposition::PrimaryDecomposition"}
      }
 document { 
      Key => [saturate, MinimalGenerators],
@@ -117,6 +117,6 @@ document {
 	  numgens J1
 	  ///,
      Caveat => {"Most of the time, you don't want to do this!"},
-     SeeAlso => {monomialCurveIdeal, truncate}
+     SeeAlso => {monomialCurveIdeal, "Truncations::truncate"}
      }
 

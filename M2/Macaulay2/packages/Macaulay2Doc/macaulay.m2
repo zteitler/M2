@@ -148,7 +148,7 @@ document {
 			 TT "cokernel M ** cokernel N"),
 		    LI ("trace -- ", TO "trace"),
 		    LI ("transpose -- ", TO "transpose"),
-		    LI ("truncate -- ", TO "truncate"),
+		    LI ("truncate -- ", TO "Truncations::truncate"),
 		    LI ("type -- ", TO "not documented yet"),
 		    LI ("version -- ", TO "version"),
 		    LI ("wedge -- ", TO "minors", ",", TO "exteriorPower")
@@ -231,7 +231,7 @@ document {
 		    LI ("<prune -- ", TO "prune"),
 		    LI ("<prune_and_map -- ", TO "not documented yet"),
 		    LI ("<push_forward -- ", TO "pushForward"),
-		    LI ("<push_forward1 -- ", TO "coimage (eventually)"),
+		    LI ("<push_forward1 -- ", TO "coimage", " (eventually)"),
 		    LI ("<quotient1 -- ", TO "quotient"),
 		    LI ("<radical -- ", TO "radical"),
 		    LI ("<random_element -- ", TO "not documented yet"),
@@ -308,13 +308,13 @@ document {
 		    LI ("<hilb_fcn -- ", TO "not documented yet"),
 		    LI ("<inhomog_std -- ", TO "not documented yet"),
 		    LI ("<l_dual0 -- ", TO "not documented yet"),
-		    LI ("<l_from_dual -- ", TO "fromDual"),
+		    LI ("<l_from_dual -- ", TO "InverseSystems::fromDual"),
 		    LI ("<l_homog0 -- ", TO "not documented yet"),
 		    LI ("<l_min0 -- ", TO "not documented yet"),
 		    LI ("<l_minimal -- ", TO "not documented yet"),
 		    LI ("<l_minimal0 -- ", TO "not documented yet"),
 		    LI ("<l_tangentcone -- ", TO "not documented yet"),
-		    LI ("<l_to_dual -- ", TO "toDual"),
+		    LI ("<l_to_dual -- ", TO "InverseSystems::toDual"),
 		    LI ("<line_bundle_image -- ", TO "not documented yet"),
 		    LI ("<normal_cone -- ", TO "not documented yet"),
 		    LI ("<proj_bundle -- ", TO "not documented yet"),
@@ -520,28 +520,28 @@ document {
      " form a Gröbner basis, use ", TT "forceGB m", ".  See ", TO "forceGB",
      ".",
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "hilb <standard basis>",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "hilb_numer <standard basis> <ideal> <result>",
      "WRITE THIS",
-     *}
+     *-
      
      HEADER3 "homog <matrix> <homog variable> <new matrix>",
      "To homogenize a matrix ", TT "m", " with respect to a variable ",
      TT "x", ", use ", TT "homogenize(m,x)", ". One may also homogenize
      with respect to a given weight vector.  See ", TO "homogenize", ".",
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "hulb <standard basis> <deg>",
      "WRITE THIS",
-     *}
+     *-
      
      HEADER3 "ideal <resulting matrix>",
      "To enter a one row matrix, use we may use the following method.",
@@ -566,23 +566,23 @@ document {
      "For conditional execution, use the if-then or if-then-else statement",
      -- Mike wanted this: "WRITE MORE",
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "imap <new ring map> <R> <S> [ones, default=zeros]",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "in <standard basis> [optional result matrix] [n]",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "inpart <standard basis> <result matrix> [variable list]",
      "WRITE THIS",
-     *}
+     *-
      
      HEADER3 "int <name> <new value>",
      "To assign a value to a variable in Macaulay2, use ", TO "=", 
@@ -626,53 +626,53 @@ document {
      "Macaulay2 has no go to statements.  Instead, you should use the
      control structures.", -- Mike wanted this: "WRITE MORE",
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "k_basis <matrix> <result matrix> [variable list]",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "keep <standard basis> <result matrix> [n]",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "kill <var1> ... <var n>",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "koszul <int n, or matrix> <p> <result matrix>",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "lift <standard basis> <matrix to lift> <result>",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "lift_std <matrix> <computation>",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "listvars",
      "WRITE THIS",
-     *}
+     *-
      
-     {*
+     -*
      -- Mike wanted this: 
      HEADER3 "mat <result matrix> [optional: file name]",
      "WRITE THIS",
-     *}
+     *-
      
      }
 

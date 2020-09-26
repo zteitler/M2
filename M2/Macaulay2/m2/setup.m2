@@ -5,9 +5,10 @@ nonempty = x -> select(x, i -> i =!= "")
 dashes  = n -> concatenate (n:"-")
 spaces  = n -> concatenate n
 
+-- a first-in last-out list of symbol values
 varstack = new MutableHashTable
 pushvar = (sym,newval) -> (
-     varstack#sym = if varstack#?sym then (value sym,varstack#sym) else (value sym, null);
+     varstack#sym = if varstack#?sym then (value' sym,varstack#sym) else (value' sym, null);
      sym <- newval;
      )
 popvar = (sym) -> if varstack#?sym then (
@@ -106,11 +107,16 @@ pathdo := (loadfun,path,filename,reportfun) -> (
      if null === scan(newpath, dir -> (
 	       if class dir =!= String then error "member of 'path' not a string";
 	       fullfilename := concatenate(dir, if dir#?0 and dir#-1 =!= "/" then "/", filename);
+	       if debugLevel === 1011 then stderr << "checking for file " << fullfilename << endl;
 	       if fileExists fullfilename then (
+	       	    if debugLevel === 1011 then stderr << "found it" << endl;
 		    filetime := fileTime fullfilename;
 		    ret = loadfun fullfilename;
 		    reportfun (fullfilename,filetime);
-		    break true)))
+		    break true)
+	       else (
+	       	    if debugLevel === 1011 then stderr << "didn't find it" << endl;
+		    )))
      then error splice("file not found",
 	  if singledir === "" then ""
 	  else if singledir =!= null then (" in \"",singledir,"\"")
@@ -139,7 +145,7 @@ lastWI := 0
      
 loads := minimizeFilename concatenate(currentFileDirectory, "loadsequence")
 if notify then stderr << "--about to read " << loads << endl
-scan(lines get loads, load)
+scan(select("^\\w+\\.m2", "$&", get loads), load)
 if notify then stderr << "--read " << loads << endl
 
 -- after this point, private global symbols, such as noinitfile, are no longer visible

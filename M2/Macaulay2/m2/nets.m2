@@ -1,24 +1,5 @@
 --		Copyright 1996-2000 by Daniel R. Grayson
 
--- strings
-
-separateRegexp = method()
-separateRegexp(String,String) := (re,s) -> separateRegexp(re,0,s)
-separateRegexp(String,ZZ,String) := (re,n,s) -> (
-     offset := 0;
-     while offset <= #s
-     list (
-	  m := regex(re,offset,s);
-	  if m#?n
-	  then first (substring(s,offset,m#n#0-offset), offset = m#n#0+m#n#1)
-	  else first (substring(s,offset), offset = #s + 1)))
-
-selectRegexp = method()
-selectRegexp(String,String) := (re,s) -> selectRegexp(re,0,s)
-selectRegexp(String,ZZ,String) := (re,n,s) -> (
-     m := regex(re,s);
-     if m#?n then substring(m#n#0,m#n#1,s) else error "regular expression didn't match")
-
 -- nets
 
 Net#{Standard,AfterPrint} = identity
@@ -52,7 +33,7 @@ toString Sequence := s -> (
      else concatenate("(",between(",",toStringn \ s),")")
      )
 net Command := toString Command := toExternalString Command := f -> (
-     if hasAttribute(f,ReverseDictionary) then return toString getAttribute(f,ReverseDictionary) else "{*Command*}"
+     if hasAttribute(f,ReverseDictionary) then return toString getAttribute(f,ReverseDictionary) else "-*Command*-"
      )
 
 toExternalString Function := f -> (
@@ -65,14 +46,14 @@ toExternalString Function := f -> (
 net Function := toString Function := f -> (
      if hasAttribute(f,ReverseDictionary) then return toString getAttribute(f,ReverseDictionary);
      t := locate f;
-     if t === null then "{*Function*}" 
-     else concatenate("{*Function[", t#0, ":", toString t#1| ":", toString (t#2+1), "-", toString t#3| ":", toString (t#4+1), "]*}")
+     if t === null then "-*Function*-" 
+     else concatenate("-*Function[", t#0, ":", toString t#1| ":", toString (t#2+1), "-", toString t#3| ":", toString (t#4+1), "]*-")
      )
 
 net FunctionBody := toString FunctionBody := f -> (
-     t := locate f;
-     if t === null then "{*FunctionBody*}" 
-     else concatenate("{*FunctionBody[", t#0, ":", toString t#1| ":", toString (t#2+1), "-", toString t#3| ":", toString (t#4+1), "]*}")
+     t := locate' f;
+     if t === null then "-*FunctionBody*-" 
+     else concatenate("-*FunctionBody[", t#0, ":", toString t#1| ":", toString (t#2+1), "-", toString t#3| ":", toString (t#4+1), "]*-")
      )
 
 toExternalString Manipulator := f -> (
@@ -119,17 +100,14 @@ toExternalString Sequence := s -> (
      if # s === 1 then concatenate("1:(",toExternalString s#0,")")
      else concatenate("(",mid s,")"))
 -----------------------------------------------------------------------------
-describe = method()
-describe Thing := net
-
 net Manipulator := toString
 net Thing := toString
 -----------------------------------------------------------------------------
 net Symbol := toString
 File << Symbol := File => (o,s) -> o << toString s		    -- provisional
 File << Thing  := File => (o,s) -> o << toString s		    -- provisional
+Nothing << Thing := File => (o,s) -> null
 -----------------------------------------------------------------------------
-net Option := z -> net z#0 | " => " | net z#1
 
 Net == String := (n,s) -> (				    -- should install in engine
      height n === 1 and depth n === 0 and width n === length s and n#0 === s
@@ -169,13 +147,20 @@ net List := x -> horizontalJoin deepSplice (
      toSequence between(comma,apply(x,netn)),
      "}")
 
-VerticalList = new SelfInitializingType of List
-VerticalList.synonym = "vertical list"
-net VerticalList := x -> if #x === 0 then "{}" else (
-     n := stack apply(x,net);
+embrace = n -> (
      h := height n;
      d := depth n;
      horizontalJoin("{"^(h,d), n, "}"^(h,d)))
+
+VerticalList = new SelfInitializingType of List
+VerticalList.synonym = "vertical list"
+net VerticalList := x -> if #x === 0 then "{}" else embrace stack apply(x,net)
+VerticalList.Wrap = x -> x
+
+NumberedVerticalList = new SelfInitializingType of VerticalList
+NumberedVerticalList.synonym = "numbered vertical list"
+net NumberedVerticalList := x -> if #x === 0 then "{}" else embrace stack apply(#x,i -> net (i => x#i));
+
 net Array := x -> horizontalJoin deepSplice (
      "[",
      toSequence between(comma,apply(x,netn)),
@@ -191,11 +176,11 @@ net MutableList := x -> (
      else horizontalJoin ( net class x, "{}")
      )
 net HashTable := x -> (
-     horizontalJoin flatten ( 
+     horizontalJoin flatten (
      	  net class x,
 	  "{", 
 	  -- the first line prints the parts vertically, second: horizontally
- 	  stack (horizontalJoin \ sort apply(pairs x,(k,v) -> (net k, " => ", net v))),
+ 	  stack (horizontalJoin \ apply(sortByName pairs x,(k,v) -> (net k, " => ", net v))),
 	  -- between(", ", apply(pairs x,(k,v) -> net k | "=>" | net v)), 
 	  "}" 
      	  ))
@@ -214,16 +199,6 @@ net Type := X -> (
 	  if hasAttribute(X,ReverseDictionary) then return toString getAttribute(X,ReverseDictionary);
 	  );
      horizontalJoin ( net class X, if #X > 0 then ("{...", toString(#X), "...}") else "{}" ))
-
-texMath Net := n -> concatenate (
-     ///{\arraycolsep=0pt
-\begin{matrix}
-///,
-     between(///\\
-///, unstack n / characters / (i -> apply(i,c -> (///\tt ///,c))) / (s -> between("&",s))),
-     ///
-\end{matrix}}
-///)
 
 -----------------------------------------------------------------------------
 
@@ -246,45 +221,49 @@ alignmentFunctions := new HashTable from {
 netList VisibleList := o -> (x) -> (
      x = apply(x, row -> if instance(row,List) then row else {row});
      (br,hs,vs,bx,algn) := (o.BaseRow,o.HorizontalSpace,o.VerticalSpace,o.Boxes,splice o.Alignment);
-     if #x == 0 then return if bx then stack(2 : "++") else stack();
      if br < 0
      or br >= #x+1					    -- this allows the base row to be absent
      then error "netList: base row out of bounds";
      x = apply(x, row->apply(row, netn));
      n := maxN(length \ x);
-     if n == 0 then return if bx then stack(2 : "++") else stack();
+     if n == 0 then ( x={{net000}}; n=1; );
+     if not instance(bx,List) then bx={bx,bx};
+     bxrows := set if bx#0 === true then 0..#x else if bx#0 === false then {} else bx#0;
+     bxcols := set if bx#1 === true then 0..n else if bx#1 === false then {} else bx#1;
      x = apply(x, row -> if #row == n then row else join(row, n-#row : stack()));
      colwids := max \ transpose applyTable(x,width);
-     if not instance(algn,List) then algn = n : algn ;
+     if not instance(algn,List) then algn = n : algn;
      algn = apply(algn, key -> alignmentFunctions#key);
      x = apply(x, row -> apply(n, i -> algn#i(colwids#i,row#i)));
-     if bx then (
-     	  if hs > 0 then (
-	       colwids = apply(colwids, wid -> wid+2*hs);
-	       hsep := spaces hs;                                 -- "spaces" puts characters on the baseline, what about an empty net of width hs?
-	       x = apply(x, row -> apply(row, i -> horizontalJoin(hsep,i,hsep)));
-	       );
-	  x = apply(x, row -> mingle(#row+1:"|"^(max(height\row)+vs,max(depth\row)+vs), row));
-	  )
-     else if hs > 0 then (
-	  hsep = spaces hs;                                 -- "spaces" puts characters on the baseline, what about an empty net of width hs?
-	  x = apply(x,i -> between(hsep,i));
-	  );
-     x = apply(x, horizontalJoin);
-     if bx then (
-	  hbar := concatenate mingle(#colwids+1:"+",apply(colwids,wid -> wid:"-"));
-	  x = mingle(#x+1:hbar,x);
-	  br = 2*br + 1;
-	  )
-     else if vs > 0 then (
-     	  x = between(stack(vs : ""),x);
-	  br = 2*br;
-	  );
+     x = apply(#x, i -> (
+	     h := max(height \ x#i);
+	     if member(i,bxrows) then h = h + vs;
+	     d := max(depth \ x#i);
+	     if member(i+1,bxrows) or i<#x-1 then d = d + vs;
+	     sep := "|"^(h,d);
+	     nosep := ""^(h,d);
+	     hsep := (spaces hs)^(h,d);
+	     (if member(0,bxcols) then sep | hsep else nosep)
+	     | (horizontalJoin mingle(x#i,apply(1..#colwids-1,j->if member(j,bxcols) then hsep|sep|hsep else hsep)))
+	     | (if member(#colwids,bxcols) then hsep | sep else nosep)
+	     ));
+     colwids = apply(#colwids, i -> colwids#i+hs*(if member(i,bxcols) then 2 else if i<#colwids-1 or member(#colwids,bxcols) then 1 else 0));
+     hbar := concatenate mingle(apply(#colwids+1,i->if member(i,bxcols) then "+" else ""),apply(colwids,wid -> wid:"-"));
+     x = mingle(apply(#x+1,i->if member(i,bxrows) then hbar else net000),x);
+     br = 2*br + 1;
      (stack x)^(
 	  sum(0 .. br-1, i -> depth x#i)
 	  +
 	  sum(1 .. br, i -> try height x#i else 1)	    -- this allows the base row to be absent
 	  ))
+
+commentize = method(Dispatch => Thing)
+commentize Nothing := s -> ""
+commentize String  :=
+commentize Thing   := s -> concatenate(" -- ", between("\n -- ", separate concatenate s))
+commentize Net     := S -> stack(commentize \ unstack S)
+
+printerr = msg -> (stderr << commentize msg << endl;) -- always return null
 
 -- Local Variables:
 -- compile-command: "make -C $M2BUILDDIR/Macaulay2/m2 "

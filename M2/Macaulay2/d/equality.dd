@@ -187,7 +187,7 @@ export equal(lhs:Expr,rhs:Expr):Expr := (
 	  )
      is x:RawMatrixCell do (
 	  when rhs
-	  is y:RawMatrixCell do toExpr(Ccode(bool, "IM2_Matrix_is_equal(",x.p,",",y.p,")"))
+	  is y:RawMatrixCell do toExpr(Ccode(bool, "1 == IM2_Matrix_is_equal(",x.p,",",y.p,")"))
 	  else False
 	  )
      is x:MysqlConnectionWrapper do (
@@ -198,6 +198,7 @@ export equal(lhs:Expr,rhs:Expr):Expr := (
      is MysqlFieldWrapper do False
      is MysqlResultWrapper do False
      is RawMutableMatrixCell do False			    -- mutable matrices may not stay equal, so they aren't equal
+     is RawMutableComplexCell do False			    -- mutable matrices may not stay equal, so they aren't equal
      -- NAG begin
      is RawHomotopyCell do False
      is RawSLEvaluatorCell do False
@@ -206,9 +207,9 @@ export equal(lhs:Expr,rhs:Expr):Expr := (
      is RawPathTrackerCell do False
      is RawPointArrayCell do False
      -- NAG end
-     is x:RawComputationCell do (
+     is RawComputationCell do (
 	  when rhs
-	  is y:RawComputationCell do (
+	  is RawComputationCell do (
 	       False
 	       -- toExpr(Ccode(bool, "IM2_GB_is_equal(",x,",",y,")"))
 	       )
@@ -226,8 +227,8 @@ export equal(lhs:Expr,rhs:Expr):Expr := (
      is pythonObjectCell do False
      is xmlNodeCell do False				    -- unimplemented
      is xmlAttrCell do False				    -- unimplemented
-     is x:TaskCell do False
-     is x:fileOutputSyncState do False
+     is TaskCell do False
+     is fileOutputSyncState do False
      );
 
 -- Local Variables:

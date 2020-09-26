@@ -1,13 +1,13 @@
 -- -*- coding: utf-8 -*-
 
-{*
+-*
 Copyright 2009, 2010 Winfried Bruns and Gesa Kaempf.
 Copyright 2011, 2012, 2015, 2016 Christof Soeger
 
 You may redistribute this file under the terms of the GNU General Public
 License as published by the Free Software Foundation, either version 2 of
 the License, or any later version.
-*}
+*-
 
 newPackage(
            "Normaliz",
@@ -17,7 +17,7 @@ newPackage(
                     Email=>"gkaempf@uni-osnabrueck.de"},
                     {Name=> "Christof Soeger",
                     Email=>"csoeger@uni-osnabrueck.de"}},
-           Headline=>"a package to use Normaliz in Macaulay 2",
+           Headline=>"interface to Normaliz in Macaulay2",
            DebuggingMode => false,
 	   Certification => {
 		"journal name" => "The Journal of Software for Algebra and Geometry: Macaulay2",
@@ -195,7 +195,7 @@ rmNmzFiles=()->
 ---------------------------------------------------------
 
 -- returns the next number in the string s, and the remaining string
-getNumber=method(TypicalValue=>(String,String))
+getNumber=method()
 getNumber String :=s->
 (
     l:=regex("[0-9-]+",s);
@@ -1357,7 +1357,7 @@ nmzFilename="polytope";
 rmNmzFiles();
 nmzFilename
 ///,
-PARA{},"If you want to change the directory where the files are saved (default is the current directory) you have two possibilities. If you want work in the same directory most of the time, you can define this in a file \"start.m2\" in the current directory and add a line in \"init.m2\" such that it is read when starting Macaulay 2. If you want to switch between directories more frequently, you can specify the directory in the global variable ", TO nmzDataPath, ".",
+PARA{},"If you want to change the directory where the files are saved (default is the current directory) you have two possibilities. If you want work in the same directory most of the time, you can define this in a file \"start.m2\" in the current directory and add a line in \"init.m2\" such that it is read when starting Macaulay 2. If you want to switch between directories more frequently, you can specify the directory in the global variable ", TO "nmzDataPath", ".",
 }
 
 document {
